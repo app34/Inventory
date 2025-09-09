@@ -9,6 +9,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --primary-shadow: rgba(76, 175, 80, 0.4);
+            --secondary-color: #333;
+            --accent-color: #4CAF50; /* Changed to green */
+            --accent-shadow: rgba(76, 175, 80, 0.3); /* Changed to green */
+            --bg-primary: #0e0e10;
+            --bg-secondary: #1a1a1d;
+            --bg-tertiary: #333;
+            --bg-hover: #444;
+            --text-primary: #fff;
+            --text-secondary: #ccc;
+            --border-color: #444;
+            --border-highlight: #4CAF50; /* Changed to green */
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -16,8 +32,8 @@
         }
 
         body {
-            background: #0e0e10;
-            color: #fff;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-family: 'Roboto', sans-serif;
             padding: 10px;
             font-size: 16px;
@@ -25,7 +41,7 @@
 
         h1 {
             text-align: center;
-            color: #ff4bd8;
+            color: var(--primary-color);
             font-size: 24px;
             padding: 10px 0;
             margin-bottom: 10px;
@@ -36,7 +52,7 @@
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
-            background: #1a1a1d;
+            background: var(--bg-secondary);
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 120px;
@@ -54,9 +70,9 @@
             padding: 8px 16px;
             font-size: 13px;
             font-weight: 600;
-            background: #333;
-            color: #ccc;
-            border: 1px solid #444;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -64,18 +80,18 @@
         }
 
         .preset-button:hover {
-            background: #ff4bd8;
-            color: #fff;
-            border-color: #ff4bd8;
+            background: var(--primary-color);
+            color: var(--text-primary);
+            border-color: var(--primary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(255, 75, 216, 0.3);
+            box-shadow: 0 4px 10px var(--primary-shadow);
         }
 
         .preset-button.active {
-            background: linear-gradient(135deg, #ff4bd8, #e03ab7);
-            color: #fff;
-            border-color: #e03ab7;
-            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.4);
+            background: linear-gradient(135deg, var(--primary-color), #3e8e41); /* Darker green */
+            color: var(--text-primary);
+            border-color: #3e8e41;
+            box-shadow: 0 4px 15px var(--primary-shadow);
             transform: translateY(-2px);
         }
 
@@ -110,11 +126,11 @@
 
         input[type="text"], input[type="number"] {
             padding: 10px;
-            border: 1px solid #444;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
-            background: #333;
-            color: #fff;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
             width: 100%;
             transition: border-color 0.3s;
         }
@@ -129,7 +145,7 @@
         }
 
         input:focus {
-            border-color: #ff4bd8;
+            border-color: var(--primary-color);
             outline: none;
         }
 
@@ -144,7 +160,7 @@
             display: flex;
             background: rgba(255, 255, 255, 0.05);
             padding: 6px;
-            border-left: 2px solid #ff4bd8;
+            border-left: 2px solid var(--primary-color);
             border-radius: 4px;
             align-items: center;
         }
@@ -152,14 +168,14 @@
         .item-name {
             flex: 1;
             font-size: 10px;
-            color: #fff;
+            color: var(--text-primary);
             word-break: break-word;
             line-height: 1.1;
             padding-right: 3px;
         }
 
         .item-name.highlight {
-            color: #ffaaaa;
+            color: #ffaaaa; /* Light Red */
         }
 
         .item-quantity {
@@ -167,9 +183,9 @@
             padding: 4px;
             text-align: center;
             font-weight: bold;
-            color: #ff4bd8;
-            background-color: #3a3a3a;
-            border: 1px solid #ff4bd850;
+            color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+            border: 1px solid rgba(76, 175, 80, 0.3);
             border-radius: 3px;
             font-size: 10px;
         }
@@ -184,15 +200,15 @@
 
         button {
             padding: 16px 20px;
-            background: linear-gradient(135deg, #ff4bd8, #e03ab7);
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary-color), #3e8e41); /* Darker green */
+            color: var(--text-primary);
             border: none;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.3);
+            box-shadow: 0 4px 15px var(--primary-shadow);
             position: relative;
             overflow: hidden;
         }
@@ -219,22 +235,22 @@
         }
 
         button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #e03ab7, #c92ea3);
+            background: linear-gradient(135deg, #3e8e41, #2e7d32); /* Darker green */
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 75, 216, 0.4);
+            box-shadow: 0 8px 25px var(--primary-shadow);
         }
 
         button:active:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.3);
+            box-shadow: 0 4px 15px var(--primary-shadow);
         }
 
         button.admin {
-            background-color: #ff4bd8;
+            background-color: var(--primary-color);
         }
 
         button.admin:hover:not(:disabled) {
-            background-color: #e03ab7;
+            background-color: #3e8e41;
         }
 
         .message {
@@ -276,8 +292,8 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background-color: #ff4bd8;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: var(--text-primary);
             border: none;
             font-size: 18px;
             display: flex;
@@ -310,7 +326,7 @@
         }
 
         .modal-content {
-            background: #1a1a1d;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 8px;
             width: 300px;
@@ -321,10 +337,10 @@
             margin: 10px 0;
             width: 100%;
             padding: 10px;
-            border: 1px solid #444;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
-            background: #333;
-            color: #fff;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
 
         .modal-content .modal-buttons {
@@ -345,25 +361,23 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: #1a1a1d;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-bottom: none;
             padding: 15px;
             border-radius: 16px 16px 0 0;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 -5px 20px var(--primary-shadow);
             z-index: 1000;
             transform: translateY(100%);
             transition: transform 0.3s ease-in-out, visibility 0.3s;
-        }
-
-        .admin-menu.active {
-            visibility: visible;
-            transform: translateY(0);
         }
 
         .admin-menu h2 {
             font-size: 16px;
             margin-bottom: 12px;
             text-align: center;
-            color: #ff4bd8;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-shadow);
         }
 
         .admin-button-grid {
@@ -386,10 +400,10 @@
             max-width: 500px;
             margin: 0 auto 10px auto;
             padding: 10px;
-            border: 1px solid #444;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
-            background: #333;
-            color: #fff;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
             display: block;
         }
 
@@ -458,10 +472,11 @@
 
         <div class="action-buttons">
             <button onclick="copyList()">Copy</button>
-            <button id="importSecretBtn" onclick="importList()" style="display:none;">Import</button>
+            <button onclick="importList()">Import</button>
             <button onclick="resetList()">Reset</button>
             <button onclick="exportPDF()">PDF</button>
             <button onclick="exportXLSX()">XLSX</button>
+            <button onclick="showHistoryForAll()">History</button>
             <button onclick="toggleAdmin()" id="adminBtn" class="admin">Admin</button>
         </div>
 
@@ -643,13 +658,17 @@
 
         // --- COPY AND IMPORT FUNCTIONS ---
         function copyList() {
+            if (!validateRequiredFields('copy operation')) {
+                return;
+            }
+
             const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
-            const personName = document.getElementById('personName').value.trim() || 'N/A';
-            const pantryNum = document.getElementById('pantryNumber').value.trim() || 'N/A';
+            const personName = document.getElementById('personName').value.trim();
+            const pantryNum = document.getElementById('pantryNumber').value.trim();
             const hasItems = items.some(item => item.quantity > 0);
 
             if (!hasItems) {
-                showMessage('No items with quantities to copy. Add some quantities first.', 'error');
+                showMessage('No items with quantities to copy. Please add some quantities first.', 'error');
                 return;
             }
 
@@ -673,7 +692,17 @@
 
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    showMessage(`Copied ${itemsWithQuantity.length} items with quantities!`, 'success');
+                    // Save to history
+                    saveToHistory('Copy List', {
+                        title: title,
+                        personName: personName,
+                        pantryNumber: pantryNum,
+                        items: itemsWithQuantity.map(item => ({
+                            name: item.fullName || item.name,
+                            quantity: item.quantity
+                        }))
+                    });
+                    showMessage(`Copied ${itemsWithQuantity.length} items with quantities successfully!`, 'success');
                 }).catch(() => fallbackCopyTextToClipboard(textToCopy));
             } else {
                 fallbackCopyTextToClipboard(textToCopy);
@@ -696,7 +725,25 @@
             }
             document.body.removeChild(textArea);
             if (successful) {
-                showMessage('Full state copied!', 'success');
+                // Save to history when fallback copy succeeds
+                const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
+                const personName = document.getElementById('personName').value.trim();
+                const pantryNum = document.getElementById('pantryNumber').value.trim();
+                const itemsWithQuantity = items.filter(item => item.quantity > 0);
+                
+                if (personName) { // Only save if we have required data
+                    saveToHistory('Copy List (Fallback)', {
+                        title: title,
+                        personName: personName,
+                        pantryNumber: pantryNum,
+                        items: itemsWithQuantity.map(item => ({
+                            name: item.fullName || item.name,
+                            quantity: item.quantity
+                        }))
+                    });
+                }
+                
+                showMessage('List copied successfully!', 'success');
             } else {
                 showMessage('Copy failed. A box will pop up.', 'error');
                 window.prompt("Automatic copy failed. Please press Ctrl+C to copy:", text);
@@ -704,7 +751,6 @@
         }
 
         function importList() {
-            hideImportButton(); // Hide button as soon as it's used
             const pastedText = window.prompt("Paste your list here to import the full state:", "");
             if (!pastedText || pastedText.trim() === '') {
                 showMessage('Import cancelled or empty input.', 'error');
@@ -861,7 +907,7 @@
                     items = appData.pantryItems;
                     renderItems();
                 }
-                
+
                 showMessage(`Synced ${addedCount} new items from Trolley to Pantry inventory`, 'success');
                 console.log('Added items:', addedItems);
             } else {
@@ -1004,6 +1050,12 @@
         }
 
         function showAdminMenu() {
+            // Hide history section if visible
+            const historySection = document.getElementById('historySection');
+            if (historySection) {
+                historySection.style.display = 'none';
+            }
+            
             document.getElementById('adminMenu').innerHTML = `
                 <h2>Admin Panel</h2>
                 <div class="admin-button-grid">
@@ -1011,23 +1063,802 @@
                     <button onclick="showRemoveItemForm()">Remove Item</button>
                     <button onclick="showBulkAddForm()">Bulk Add</button>
                     <button onclick="syncTrolleyItemsToPantry()">Sync Trolley→Pantry</button>
+                    <button onclick="showHistoryList()">📋 View History</button>
                     <button onclick="logoutAdmin()">Logout & Close</button>
                 </div>
             `;
         }
 
+        // --- ENHANCED HISTORY MANAGEMENT ---
+        const HISTORY_STORAGE_KEY = 'oblu_housekeeping_history';
+        let historyFilters = {
+            action: 'all',
+            dateRange: 'all',
+            person: 'all',
+            searchTerm: ''
+        };
+
+        function saveToHistory(action, data) {
+            try {
+                const history = getHistoryFromStorage();
+                const timestamp = new Date().toISOString();
+                const historyEntry = {
+                    id: timestamp + '_' + Math.random().toString(36).substr(2, 9),
+                    timestamp: timestamp,
+                    action: action,
+                    data: {
+                        ...data,
+                        // Enhanced data tracking
+                        totalItems: data.items ? data.items.length : 0,
+                        totalQuantity: data.items ? data.items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0,
+                        browser: navigator.userAgent.split(' ').pop(),
+                        sessionId: getOrCreateSessionId()
+                    },
+                    humanDate: new Date().toLocaleString('en-US', { 
+                        timeZone: 'Indian/Maldives',
+                        year: 'numeric',
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }),
+                    dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Indian/Maldives' }),
+                    dateOnly: new Date().toLocaleDateString('en-US', { timeZone: 'Indian/Maldives' })
+                };
+                
+                history.unshift(historyEntry);
+                
+                // Keep only last 200 entries (increased from 100)
+                if (history.length > 200) {
+                    history.splice(200);
+                }
+                
+                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+                return historyEntry.id;
+            } catch (error) {
+                console.error('Error saving to history:', error);
+                showMessage('Warning: Could not save to history', 'error');
+            }
+        }
+
+        function getOrCreateSessionId() {
+            let sessionId = sessionStorage.getItem('oblu_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                sessionStorage.setItem('oblu_session_id', sessionId);
+            }
+            return sessionId;
+        }
+
+        function getHistoryFromStorage() {
+            try {
+                const historyData = localStorage.getItem(HISTORY_STORAGE_KEY);
+                return historyData ? JSON.parse(historyData) : [];
+            } catch (error) {
+                console.error('Error loading history:', error);
+                return [];
+            }
+        }
+
+        function getFilteredHistory() {
+            let history = getHistoryFromStorage();
+            
+            // Filter by action
+            if (historyFilters.action !== 'all') {
+                history = history.filter(entry => entry.action.toLowerCase().includes(historyFilters.action.toLowerCase()));
+            }
+            
+            // Filter by date range
+            if (historyFilters.dateRange !== 'all') {
+                const now = new Date();
+                let cutoffDate;
+                switch (historyFilters.dateRange) {
+                    case 'today':
+                        cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        break;
+                    case 'week':
+                        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'month':
+                        cutoffDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                        break;
+                }
+                if (cutoffDate) {
+                    history = history.filter(entry => new Date(entry.timestamp) >= cutoffDate);
+                }
+            }
+            
+            // Filter by person
+            if (historyFilters.person !== 'all') {
+                history = history.filter(entry => 
+                    entry.data.personName && entry.data.personName.toLowerCase().includes(historyFilters.person.toLowerCase())
+                );
+            }
+            
+            // Filter by search term
+            if (historyFilters.searchTerm) {
+                const searchTerm = historyFilters.searchTerm.toLowerCase();
+                history = history.filter(entry => 
+                    entry.action.toLowerCase().includes(searchTerm) ||
+                    (entry.data.title && entry.data.title.toLowerCase().includes(searchTerm)) ||
+                    (entry.data.personName && entry.data.personName.toLowerCase().includes(searchTerm)) ||
+                    (entry.data.pantryNumber && entry.data.pantryNumber.toLowerCase().includes(searchTerm)) ||
+                    (entry.data.items && entry.data.items.some(item => item.name.toLowerCase().includes(searchTerm)))
+                );
+            }
+            
+            return history;
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+                localStorage.removeItem(HISTORY_STORAGE_KEY);
+                showMessage('History cleared successfully', 'success');
+                
+                // Refresh history displays
+                refreshHistoryDisplays();
+            }
+        }
+
+        function refreshHistoryDisplays() {
+            if (document.getElementById('historySection') && document.getElementById('historySection').style.display !== 'none') {
+                showHistoryList();
+            }
+            if (document.getElementById('historyModal') && document.getElementById('historyModal').classList.contains('active')) {
+                showHistoryForAll();
+            }
+        }
+
+        function downloadHistory(format = 'detailed') {
+            try {
+                const history = getFilteredHistory();
+                if (history.length === 0) {
+                    showMessage('No history entries found to download', 'error');
+                    return;
+                }
+
+                let content, filename, mimeType;
+
+                if (format === 'csv') {
+                    // CSV format
+                    const csvHeaders = ['Date', 'Day', 'Action', 'Title', 'Person', 'Pantry', 'Total Items', 'Total Quantity', 'Session ID'];
+                    const csvRows = history.map(entry => [
+                        entry.humanDate,
+                        entry.dayOfWeek,
+                        entry.action,
+                        entry.data.title || '',
+                        entry.data.personName || '',
+                        entry.data.pantryNumber || '',
+                        entry.data.totalItems || 0,
+                        entry.data.totalQuantity || 0,
+                        entry.data.sessionId || ''
+                    ]);
+                    
+                    content = [csvHeaders, ...csvRows].map(row => 
+                        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+                    ).join('\n');
+                    filename = `housekeeping_history_${new Date().toISOString().slice(0, 10)}.csv`;
+                    mimeType = 'text/csv';
+                } else {
+                    // Detailed text format
+                    content = generateDetailedHistoryReport(history);
+                    filename = `housekeeping_history_detailed_${new Date().toISOString().slice(0, 10)}.txt`;
+                    mimeType = 'text/plain';
+                }
+
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showMessage(`History downloaded successfully (${format.toUpperCase()})`, 'success');
+            } catch (error) {
+                console.error('Error downloading history:', error);
+                showMessage('Error downloading history', 'error');
+            }
+        }
+
+        function generateDetailedHistoryReport(history) {
+            let report = `OBLU SELECT Sangeli Housekeeping - History Report\n`;
+            report += `Generated on: ${new Date().toLocaleString('en-US', { timeZone: 'Indian/Maldives' })}\n`;
+            report += `Total Entries: ${history.length}\n`;
+            report += `${'='.repeat(80)}\n\n`;
+
+            // Summary statistics
+            const stats = generateHistoryStats(history);
+            report += `SUMMARY STATISTICS:\n`;
+            report += `- Most Active User: ${stats.mostActiveUser} (${stats.mostActiveUserCount} actions)\n`;
+            report += `- Most Common Action: ${stats.mostCommonAction} (${stats.mostCommonActionCount} times)\n`;
+            report += `- Total Items Processed: ${stats.totalItemsProcessed}\n`;
+            report += `- Total Quantity Processed: ${stats.totalQuantityProcessed}\n`;
+            report += `- Date Range: ${stats.dateRange}\n`;
+            report += `- Unique Users: ${stats.uniqueUsers}\n`;
+            report += `- Unique Sessions: ${stats.uniqueSessions}\n\n`;
+            report += `${'='.repeat(80)}\n\n`;
+
+            // Detailed entries
+            report += `DETAILED ENTRIES:\n\n`;
+            history.forEach((entry, index) => {
+                report += `Entry #${index + 1}\n`;
+                report += `Date: ${entry.humanDate} (${entry.dayOfWeek})\n`;
+                report += `Action: ${entry.action}\n`;
+                report += `Title: ${entry.data.title || 'N/A'}\n`;
+                report += `Person: ${entry.data.personName || 'N/A'}\n`;
+                if (entry.data.pantryNumber) {
+                    report += `Pantry: ${entry.data.pantryNumber}\n`;
+                }
+                report += `Total Items: ${entry.data.totalItems || 0}\n`;
+                report += `Total Quantity: ${entry.data.totalQuantity || 0}\n`;
+                report += `Session ID: ${entry.data.sessionId || 'N/A'}\n`;
+                
+                if (entry.data.items && entry.data.items.length > 0) {
+                    report += `Items with quantities:\n`;
+                    entry.data.items.forEach(item => {
+                        report += `  - ${item.name}: ${item.quantity}\n`;
+                    });
+                }
+                
+                if (entry.data.filename) {
+                    report += `Generated File: ${entry.data.filename}\n`;
+                }
+                
+                report += `\n${'-'.repeat(40)}\n\n`;
+            });
+
+            return report;
+        }
+
+        function generateHistoryStats(history) {
+            const userCounts = {};
+            const actionCounts = {};
+            let totalItems = 0;
+            let totalQuantity = 0;
+            const sessions = new Set();
+            let earliestDate = null;
+            let latestDate = null;
+
+            history.forEach(entry => {
+                // User statistics
+                const user = entry.data.personName || 'Unknown';
+                userCounts[user] = (userCounts[user] || 0) + 1;
+                
+                // Action statistics
+                actionCounts[entry.action] = (actionCounts[entry.action] || 0) + 1;
+                
+                // Item and quantity statistics
+                totalItems += entry.data.totalItems || 0;
+                totalQuantity += entry.data.totalQuantity || 0;
+                
+                // Session tracking
+                if (entry.data.sessionId) {
+                    sessions.add(entry.data.sessionId);
+                }
+                
+                // Date range
+                const entryDate = new Date(entry.timestamp);
+                if (!earliestDate || entryDate < earliestDate) earliestDate = entryDate;
+                if (!latestDate || entryDate > latestDate) latestDate = entryDate;
+            });
+
+            const mostActiveUser = Object.keys(userCounts).reduce((a, b) => userCounts[a] > userCounts[b] ? a : b, 'N/A');
+            const mostCommonAction = Object.keys(actionCounts).reduce((a, b) => actionCounts[a] > actionCounts[b] ? a : b, 'N/A');
+
+            return {
+                mostActiveUser,
+                mostActiveUserCount: userCounts[mostActiveUser] || 0,
+                mostCommonAction,
+                mostCommonActionCount: actionCounts[mostCommonAction] || 0,
+                totalItemsProcessed: totalItems,
+                totalQuantityProcessed: totalQuantity,
+                uniqueUsers: Object.keys(userCounts).length,
+                uniqueSessions: sessions.size,
+                dateRange: earliestDate && latestDate ? 
+                    `${earliestDate.toLocaleDateString()} to ${latestDate.toLocaleDateString()}` : 'N/A'
+            };
+        }
+
+        function copyHistoryToClipboard() {
+            try {
+                const history = getFilteredHistory();
+                if (history.length === 0) {
+                    showMessage('No history entries found to copy', 'error');
+                    return;
+                }
+
+                const historyText = history.map(entry => {
+                    let text = `📅 ${entry.humanDate} - ${entry.action}\n`;
+                    text += `👤 ${entry.data.personName || 'N/A'}`;
+                    if (entry.data.title) text += ` | 📋 ${entry.data.title}`;
+                    if (entry.data.pantryNumber) text += ` | 🏠 ${entry.data.pantryNumber}`;
+                    if (entry.data.totalItems > 0) text += ` | 📦 ${entry.data.totalItems} items (${entry.data.totalQuantity} total qty)`;
+                    if (entry.data.items && entry.data.items.length > 0) {
+                        text += `\n   Items: ${entry.data.items.map(i => `${i.name}(${i.quantity})`).join(', ')}`;
+                    }
+                    return text;
+                }).join('\n\n');
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(historyText).then(() => {
+                        showMessage('History copied to clipboard', 'success');
+                    }).catch(() => fallbackCopyTextToClipboard(historyText));
+                } else {
+                    fallbackCopyTextToClipboard(historyText);
+                }
+            } catch (error) {
+                console.error('Error copying history:', error);
+                showMessage('Error copying history', 'error');
+            }
+        }
+
+        function deleteHistoryEntry(entryId) {
+            if (confirm('Delete this history entry?')) {
+                try {
+                    const history = getHistoryFromStorage();
+                    const filteredHistory = history.filter(entry => entry.id !== entryId);
+                    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(filteredHistory));
+                    showMessage('History entry deleted', 'success');
+                    refreshHistoryDisplays();
+                } catch (error) {
+                    console.error('Error deleting history entry:', error);
+                    showMessage('Error deleting history entry', 'error');
+                }
+            }
+        }
+
+        function bulkDeleteHistory() {
+            const selectedEntries = Array.from(document.querySelectorAll('.history-checkbox:checked')).map(cb => cb.value);
+            if (selectedEntries.length === 0) {
+                showMessage('No entries selected for deletion', 'error');
+                return;
+            }
+            
+            if (confirm(`Delete ${selectedEntries.length} selected history entries?`)) {
+                try {
+                    const history = getHistoryFromStorage();
+                    const filteredHistory = history.filter(entry => !selectedEntries.includes(entry.id));
+                    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(filteredHistory));
+                    showMessage(`${selectedEntries.length} history entries deleted`, 'success');
+                    refreshHistoryDisplays();
+                } catch (error) {
+                    console.error('Error bulk deleting history:', error);
+                    showMessage('Error deleting history entries', 'error');
+                }
+            }
+        }
+
+        function showHistoryStats() {
+            const history = getHistoryFromStorage();
+            const stats = generateHistoryStats(history);
+            
+            const statsHtml = `
+                <div style="background: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">📊 History Statistics</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                        <div><strong>Total Entries:</strong> ${history.length}</div>
+                        <div><strong>Most Active User:</strong> ${stats.mostActiveUser} (${stats.mostActiveUserCount})</div>
+                        <div><strong>Most Common Action:</strong> ${stats.mostCommonAction} (${stats.mostCommonActionCount})</div>
+                        <div><strong>Total Items Processed:</strong> ${stats.totalItemsProcessed}</div>
+                        <div><strong>Total Quantity:</strong> ${stats.totalQuantityProcessed}</div>
+                        <div><strong>Unique Users:</strong> ${stats.uniqueUsers}</div>
+                        <div><strong>Unique Sessions:</strong> ${stats.uniqueSessions}</div>
+                        <div style="grid-column: 1 / -1;"><strong>Date Range:</strong> ${stats.dateRange}</div>
+                    </div>
+                </div>
+            `;
+            
+            return statsHtml;
+        }
+
+        function showHistoryList() {
+            const history = getFilteredHistory();
+            const historySection = document.getElementById('historySection');
+            
+            if (!historySection) {
+                const adminMenu = document.getElementById('adminMenu');
+                const historyHTML = `
+                    <div id="historySection" style="display: none;">
+                        <h2>📋 Advanced History Management</h2>
+                        ${createHistoryFiltersHTML()}
+                        ${showHistoryStats()}
+                        <div style="margin: 10px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="downloadHistory('detailed')" style="flex: 1; min-width: 100px; font-size: 11px;">📥 Download Detailed</button>
+                            <button onclick="downloadHistory('csv')" style="flex: 1; min-width: 100px; font-size: 11px;">📊 Download CSV</button>
+                            <button onclick="copyHistoryToClipboard()" style="flex: 1; min-width: 100px; font-size: 11px;">📋 Copy Filtered</button>
+                            <button onclick="bulkDeleteHistory()" style="flex: 1; min-width: 100px; font-size: 11px; background: #e74c3c;">🗑️ Delete Selected</button>
+                            <button onclick="clearHistory()" style="flex: 1; min-width: 100px; font-size: 11px; background: #c0392b;">🗑️ Clear All</button>
+                            <button onclick="showAdminMenu()" style="flex: 1; min-width: 100px; font-size: 11px;">← Back</button>
+                        </div>
+                        <div id="historyList" style="max-height: 400px; overflow-y: auto; border: 1px solid #444; border-radius: 6px; background: var(--bg-tertiary); padding: 10px;"></div>
+                    </div>
+                `;
+                adminMenu.insertAdjacentHTML('beforeend', historyHTML);
+            } else {
+                // Update existing section
+                document.getElementById('historySection').innerHTML = `
+                    <h2>📋 Advanced History Management</h2>
+                    ${createHistoryFiltersHTML()}
+                    ${showHistoryStats()}
+                    <div style="margin: 10px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="downloadHistory('detailed')" style="flex: 1; min-width: 100px; font-size: 11px;">📥 Download Detailed</button>
+                        <button onclick="downloadHistory('csv')" style="flex: 1; min-width: 100px; font-size: 11px;">📊 Download CSV</button>
+                        <button onclick="copyHistoryToClipboard()" style="flex: 1; min-width: 100px; font-size: 11px;">📋 Copy Filtered</button>
+                        <button onclick="bulkDeleteHistory()" style="flex: 1; min-width: 100px; font-size: 11px; background: #e74c3c;">🗑️ Delete Selected</button>
+                        <button onclick="clearHistory()" style="flex: 1; min-width: 100px; font-size: 11px; background: #c0392b;">🗑️ Clear All</button>
+                        <button onclick="showAdminMenu()" style="flex: 1; min-width: 100px; font-size: 11px;">← Back</button>
+                    </div>
+                    <div id="historyList" style="max-height: 400px; overflow-y: auto; border: 1px solid #444; border-radius: 6px; background: var(--bg-tertiary); padding: 10px;"></div>
+                `;
+            }
+            
+            document.getElementById('historySection').style.display = 'block';
+            renderHistoryList(history);
+        }
+
+        function createHistoryFiltersHTML() {
+            const history = getHistoryFromStorage();
+            const uniquePersons = [...new Set(history.map(h => h.data.personName).filter(Boolean))];
+            const uniqueActions = [...new Set(history.map(h => h.action))];
+            
+            return `
+                <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 8px;">
+                        <select onchange="updateHistoryFilter('action', this.value)" style="padding: 4px; font-size: 11px;">
+                            <option value="all">All Actions</option>
+                            ${uniqueActions.map(action => `<option value="${action}" ${historyFilters.action === action ? 'selected' : ''}>${action}</option>`).join('')}
+                        </select>
+                        <select onchange="updateHistoryFilter('dateRange', this.value)" style="padding: 4px; font-size: 11px;">
+                            <option value="all" ${historyFilters.dateRange === 'all' ? 'selected' : ''}>All Time</option>
+                            <option value="today" ${historyFilters.dateRange === 'today' ? 'selected' : ''}>Today</option>
+                            <option value="week" ${historyFilters.dateRange === 'week' ? 'selected' : ''}>This Week</option>
+                            <option value="month" ${historyFilters.dateRange === 'month' ? 'selected' : ''}>This Month</option>
+                        </select>
+                        <select onchange="updateHistoryFilter('person', this.value)" style="padding: 4px; font-size: 11px;">
+                            <option value="all">All Persons</option>
+                            ${uniquePersons.map(person => `<option value="${person}" ${historyFilters.person === person ? 'selected' : ''}>${person}</option>`).join('')}
+                        </select>
+                    </div>
+                    <input type="text" placeholder="Search in history..." value="${historyFilters.searchTerm}" 
+                           onkeyup="updateHistoryFilter('searchTerm', this.value)" 
+                           style="width: 100%; padding: 6px; font-size: 11px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid #444;">
+                    <div style="margin-top: 8px; font-size: 10px; color: #888;">
+                        Showing ${getFilteredHistory().length} of ${getHistoryFromStorage().length} entries
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateHistoryFilter(filterType, value) {
+            historyFilters[filterType] = value;
+            renderHistoryList(getFilteredHistory());
+            
+            // Update the stats display
+            const statsContainer = document.querySelector('#historySection .grid');
+            if (statsContainer) {
+                statsContainer.innerHTML = showHistoryStats();
+            }
+        }
+
+        function renderHistoryList(history) {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No history entries found with current filters</p>';
+                return;
+            }
+
+            historyList.innerHTML = `
+                <div style="margin-bottom: 10px; padding: 8px; background: var(--bg-secondary); border-radius: 4px;">
+                    <label style="font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" onchange="toggleAllHistoryCheckboxes(this.checked)" style="margin: 0;"> 
+                        Select All (${history.length} entries)
+                    </label>
+                </div>
+                ${history.map(entry => `
+                    <div style="border-bottom: 1px solid #555; padding: 12px 0; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" class="history-checkbox" value="${entry.id}" style="margin: 0;">
+                                <strong style="color: var(--primary-color); font-size: 12px;">${entry.action}</strong>
+                                ${entry.data.totalItems > 0 ? `<span style="background: #4CAF50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">${entry.data.totalItems} items</span>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="importFromHistoryEntry('${entry.id}')" 
+                                        style="background: #4CAF50; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Quick Import">📥</button>
+                                <button onclick="viewHistoryEntryDetails('${entry.id}')" 
+                                        style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="View Details">👁️</button>
+                                <button onclick="deleteHistoryEntry('${entry.id}')" 
+                                        style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Delete">×</button>
+                            </div>
+                        </div>
+                        <div style="font-size: 10px; color: #888; margin-bottom: 5px;">
+                            📅 ${entry.humanDate} (${entry.dayOfWeek})
+                        </div>
+                        <div style="font-size: 11px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 5px;">
+                            <div><strong>Title:</strong> ${entry.data.title || 'N/A'}</div>
+                            <div><strong>Person:</strong> ${entry.data.personName || 'N/A'}</div>
+                            ${entry.data.pantryNumber ? `<div><strong>Pantry:</strong> ${entry.data.pantryNumber}</div>` : ''}
+                            ${entry.data.totalQuantity > 0 ? `<div><strong>Total Qty:</strong> ${entry.data.totalQuantity}</div>` : ''}
+                        </div>
+                        ${entry.data.filename ? `<div style="font-size: 10px; color: #4CAF50; margin-top: 3px;">📄 ${entry.data.filename}</div>` : ''}
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function toggleAllHistoryCheckboxes(checked) {
+            document.querySelectorAll('.history-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function viewHistoryEntryDetails(entryId) {
+            const history = getHistoryFromStorage();
+            const entry = history.find(h => h.id === entryId);
+            if (!entry) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'password-modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                        <h2 style="margin: 0; color: var(--primary-color);">📋 History Entry Details</h2>
+                        <button onclick="this.closest('.password-modal').remove()" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">✕</button>
+                    </div>
+                    <div style="font-size: 12px; line-height: 1.6;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div><strong>Action:</strong> ${entry.action}</div>
+                            <div><strong>Date:</strong> ${entry.humanDate}</div>
+                            <div><strong>Day:</strong> ${entry.dayOfWeek}</div>
+                            <div><strong>Session ID:</strong> ${entry.data.sessionId || 'N/A'}</div>
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <div><strong>Title:</strong> ${entry.data.title || 'N/A'}</div>
+                            <div><strong>Person:</strong> ${entry.data.personName || 'N/A'}</div>
+                            ${entry.data.pantryNumber ? `<div><strong>Pantry:</strong> ${entry.data.pantryNumber}</div>` : ''}
+                            ${entry.data.filename ? `<div><strong>Generated File:</strong> ${entry.data.filename}</div>` : ''}
+                        </div>
+                        ${entry.data.items && entry.data.items.length > 0 ? `
+                            <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <strong>Items (${entry.data.items.length} total, ${entry.data.totalQuantity} quantity):</strong>
+                                <div style="max-height: 200px; overflow-y: auto; margin-top: 8px;">
+                                    ${entry.data.items.map(item => `
+                                        <div style="display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #555;">
+                                            <span style="flex: 1;">${item.name}</span>
+                                            <span style="font-weight: bold; color: var(--primary-color);">${item.quantity}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div style="display: flex; gap: 8px; margin-top: 15px; padding-top: 10px; border-top: 1px solid #444;">
+                            <button onclick="importFromHistoryEntry('${entry.id}')" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px;">
+                                📥 Import This Data
+                            </button>
+                            <button onclick="this.closest('.password-modal').remove()" style="flex: 1; background: #666; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px;">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function importFromHistoryEntry(entryId) {
+            const history = getHistoryFromStorage();
+            const entry = history.find(h => h.id === entryId);
+            if (!entry) {
+                showMessage('History entry not found', 'error');
+                return;
+            }
+
+            try {
+                // Set the title and switch to appropriate menu
+                if (entry.data.title) {
+                    setTitle(entry.data.title);
+                }
+
+                // Set person name
+                if (entry.data.personName) {
+                    document.getElementById('personName').value = entry.data.personName;
+                }
+
+                // Set pantry number if available
+                if (entry.data.pantryNumber) {
+                    document.getElementById('pantryNumber').value = entry.data.pantryNumber;
+                    updatePantryButtonState(entry.data.pantryNumber);
+                }
+
+                // Reset all current quantities to 0
+                items.forEach(item => item.quantity = 0);
+
+                // Import the quantities from history
+                let importedCount = 0;
+                let newItemsAdded = 0;
+
+                if (entry.data.items && entry.data.items.length > 0) {
+                    entry.data.items.forEach(historyItem => {
+                        // Try to find matching item in current items
+                        let foundItem = items.find(item => 
+                            item.name === historyItem.name ||
+                            item.displayName === historyItem.name ||
+                            item.fullName === historyItem.name
+                        );
+
+                        if (foundItem) {
+                            foundItem.quantity = historyItem.quantity;
+                            importedCount++;
+                        } else if (isAdmin) {
+                            // Add new item if admin is logged in
+                            items.push({
+                                name: historyItem.name,
+                                displayName: historyItem.name,
+                                quantity: historyItem.quantity
+                            });
+                            newItemsAdded++;
+                        }
+                    });
+                }
+
+                renderItems();
+                updateFloatingButtons();
+
+                // Close the modal
+                const modal = document.querySelector('.password-modal.active');
+                if (modal) modal.remove();
+
+                // Close history modal if open
+                closeHistoryModal();
+
+                let successMessage = `Successfully imported data from history entry. `;
+                successMessage += `Set ${importedCount} item quantities`;
+                if (newItemsAdded > 0) {
+                    successMessage += `, added ${newItemsAdded} new items`;
+                }
+                if (!isAdmin && entry.data.items && entry.data.items.length > importedCount) {
+                    successMessage += `. Note: Some items couldn't be imported (admin access required to add new items)`;
+                }
+                successMessage += '.';
+
+                showMessage(successMessage, 'success');
+
+                // Save this import action to history
+                saveToHistory('Import from History', {
+                    title: entry.data.title || 'Unknown',
+                    personName: entry.data.personName || 'Unknown',
+                    pantryNumber: entry.data.pantryNumber || '',
+                    sourceEntryId: entryId,
+                    sourceDate: entry.humanDate,
+                    items: entry.data.items || []
+                });
+
+            } catch (error) {
+                console.error('Error importing from history:', error);
+                showMessage('Error importing from history entry', 'error');
+            }
+        }
+
+        function showHistoryForAll() {
+            let historyModal = document.getElementById('historyModal');
+            
+            if (!historyModal) {
+                historyModal = document.createElement('div');
+                historyModal.id = 'historyModal';
+                historyModal.className = 'password-modal';
+                document.body.appendChild(historyModal);
+            }
+
+            historyModal.innerHTML = `
+                <div class="modal-content" style="width: 95%; max-width: 800px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                        <h2 style="margin: 0; color: var(--primary-color);">📋 Activity History</h2>
+                        <button onclick="closeHistoryModal()" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">✕</button>
+                    </div>
+                    ${createHistoryFiltersHTML()}
+                    ${showHistoryStats()}
+                    <div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="downloadHistory('detailed')" style="flex: 1; min-width: 100px; padding: 8px; font-size: 11px;">📥 Download Detailed</button>
+                        <button onclick="downloadHistory('csv')" style="flex: 1; min-width: 100px; padding: 8px; font-size: 11px;">📊 Download CSV</button>
+                        <button onclick="copyHistoryToClipboard()" style="flex: 1; min-width: 100px; padding: 8px; font-size: 11px;">📋 Copy Filtered</button>
+                        <button onclick="clearHistory()" style="flex: 1; min-width: 100px; padding: 8px; font-size: 11px; background: #e74c3c;">🗑️ Clear All</button>
+                    </div>
+                    <div id="publicHistoryList" style="flex: 1; overflow-y: auto; border: 1px solid #444; border-radius: 6px; background: var(--bg-tertiary); padding: 10px;"></div>
+                </div>
+            `;
+
+            historyModal.classList.add('active');
+            renderPublicHistoryList(getFilteredHistory());
+        }
+
+        function renderPublicHistoryList(history) {
+            const historyList = document.getElementById('publicHistoryList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No history entries found with current filters</p>';
+                return;
+            }
+
+            historyList.innerHTML = history.map(entry => `
+                <div style="border-bottom: 1px solid #555; padding: 12px 0; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: var(--primary-color); font-size: 12px;">${entry.action}</strong>
+                            ${entry.data.totalItems > 0 ? `<span style="background: #4CAF50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">${entry.data.totalItems} items</span>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="importFromHistoryEntry('${entry.id}')" 
+                                    style="background: #4CAF50; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Quick Import">📥</button>
+                            <button onclick="viewHistoryEntryDetails('${entry.id}')" 
+                                    style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="View Details">👁️</button>
+                            <button onclick="deleteHistoryEntry('${entry.id}')" 
+                                    style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Delete">×</button>
+                        </div>
+                    </div>
+                    <div style="font-size: 10px; color: #888; margin-bottom: 5px;">
+                        📅 ${entry.humanDate} (${entry.dayOfWeek})
+                    </div>
+                    <div style="font-size: 11px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 5px;">
+                        <div><strong>Title:</strong> ${entry.data.title || 'N/A'}</div>
+                        <div><strong>Person:</strong> ${entry.data.personName || 'N/A'}</div>
+                        ${entry.data.pantryNumber ? `<div><strong>Pantry:</strong> ${entry.data.pantryNumber}</div>` : ''}
+                        ${entry.data.totalQuantity > 0 ? `<div><strong>Total Qty:</strong> ${entry.data.totalQuantity}</div>` : ''}
+                    </div>
+                    ${entry.data.filename ? `<div style="font-size: 10px; color: #4CAF50; margin-top: 3px;">📄 ${entry.data.filename}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function closeHistoryModal() {
+            const historyModal = document.getElementById('historyModal');
+            if (historyModal) {
+                historyModal.classList.remove('active');
+            }
+        }
+
+        // --- VALIDATION FUNCTIONS ---
+        function validateRequiredFields(action = 'action') {
+            const personName = document.getElementById('personName').value.trim();
+            const title = document.getElementById('pdfTitle').value.trim();
+            const pantryNum = document.getElementById('pantryNumber').value.trim();
+
+            // Person name is always required
+            if (!personName) {
+                showMessage(`Please enter the "Filled by" name before performing this ${action}. This field is required for all operations.`, 'error');
+                document.getElementById('personName').focus();
+                document.getElementById('personName').style.borderColor = '#e74c3c';
+                setTimeout(() => {
+                    document.getElementById('personName').style.borderColor = '';
+                }, 3000);
+                return false;
+            }
+
+            // Check if pantry number is required but missing
+            if ((title.includes('Pantry') || title.includes('pantry')) && !pantryNum) {
+                showMessage(`Please enter the pantry number for pantry-related ${action}s. This field is required when working with pantry inventories.`, 'error');
+                document.getElementById('pantryNumber').focus();
+                document.getElementById('pantryNumber').style.borderColor = '#e74c3c';
+                setTimeout(() => {
+                    document.getElementById('pantryNumber').style.borderColor = '';
+                }, 3000);
+                return false;
+            }
+
+            return true;
+        }
+
         // --- EXPORT FUNCTIONS ---
         function exportPDF() {
+            if (!validateRequiredFields('PDF export')) {
+                return;
+            }
+
             const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
             const personName = document.getElementById('personName').value.trim();
             const pantryNum = document.getElementById('pantryNumber').value.trim();
-
-            // Validation for required fields
-            if (!personName) {
-                showMessage('Please enter the filled by name before exporting PDF.', 'error');
-                document.getElementById('personName').focus();
-                return;
-            }
 
             // Check if pantry number is required but missing
             if ((title.includes('Pantry') || title.includes('pantry')) && !pantryNum) {
@@ -1070,7 +1901,7 @@
             const tableConfig = {
                 theme: 'grid',
                 headStyles: { 
-                    fillColor: '#4A90E2', 
+                    fillColor: '#4CAF50', /* Green */
                     textColor: '#FFFFFF', 
                     fontStyle: 'bold', 
                     fontSize: 9, 
@@ -1130,20 +1961,34 @@
             const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const dateStr = new Date().toISOString().slice(0, 10);
-            doc.save(`${safePersonName}_${safeTitle}_${dateStr}.pdf`);
-            showMessage('PDF downloaded!', 'success');
+            const filename = `${safePersonName}_${safeTitle}_${dateStr}.pdf`;
+            
+            doc.save(filename);
+            
+            // Save to history
+            const itemsWithQuantity = items.filter(item => item.quantity > 0);
+            saveToHistory('PDF Export', {
+                title: title,
+                personName: personName,
+                pantryNumber: pantryNum,
+                filename: filename,
+                items: itemsWithQuantity.map(item => ({
+                    name: item.fullName || item.name,
+                    quantity: item.quantity
+                }))
+            });
+            
+            showMessage('PDF downloaded successfully!', 'success');
         }
 
         function exportXLSX() {
-            const title = document.getElementById('pdfTitle').value.trim() || 'Pantry Request';
-            const personName = document.getElementById('personName').value.trim();
-
-            // Validation for required fields
-            if (!personName) {
-                showMessage('Please enter the filled by name before exporting XLSX.', 'error');
-                document.getElementById('personName').focus();
+            if (!validateRequiredFields('XLSX export')) {
                 return;
             }
+
+            const title = document.getElementById('pdfTitle').value.trim() || 'Pantry Request';
+            const personName = document.getElementById('personName').value.trim();
+            const pantryNum = document.getElementById('pantryNumber').value.trim();
 
             if (title.startsWith('Trolley')) {
                 const date = new Date().toLocaleString('en-US', {
@@ -1172,21 +2017,27 @@
                 const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 const dateStr = new Date().toISOString().slice(0, 10);
-                XLSX.writeFile(wb, `${safePersonName}_${safeTitle}_${dateStr}.xlsx`);
+                const filename = `${safePersonName}_${safeTitle}_${dateStr}.xlsx`;
+                
+                XLSX.writeFile(wb, filename);
 
-                showMessage('XLSX downloaded!', 'success');
+                // Save to history
+                const itemsWithQuantity = items.filter(item => item.quantity > 0);
+                saveToHistory('XLSX Export', {
+                    title: title,
+                    personName: personName,
+                    filename: filename,
+                    items: itemsWithQuantity.map(item => ({
+                        name: item.fullName || item.name,
+                        quantity: item.quantity
+                    }))
+                });
+
+                showMessage('XLSX downloaded successfully!', 'success');
                 return;
             }
 
-            // Pantry Export Logic with validation
-            const pantryNum = document.getElementById('pantryNumber').value.trim();
-
-            // Check if pantry number is required but missing
-            if ((title.includes('Pantry') || title.includes('pantry')) && !pantryNum) {
-                showMessage('Please enter the pantry number for pantry-related requests.', 'error');
-                document.getElementById('pantryNumber').focus();
-                return;
-            }
+            // Pantry Export Logic - validation already done above
 
             const pantryNumDisplay = pantryNum || 'N/A';
             const personNameDisplay = personName || 'N/A';
@@ -1240,68 +2091,27 @@
             const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const safePersonName = personNameDisplay.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const dateStr = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `${safePersonName}_${safeTitle}_${dateStr}.xlsx`);
-            showMessage('XLSX downloaded!', 'success');
+            const filename = `${safePersonName}_${safeTitle}_${dateStr}.xlsx`;
+            
+            XLSX.writeFile(wb, filename);
+            
+            // Save to history
+            const itemsWithQuantity = items.filter(item => item.quantity > 0);
+            saveToHistory('XLSX Export', {
+                title: title,
+                personName: personNameDisplay,
+                pantryNumber: pantryNum,
+                filename: filename,
+                items: itemsWithQuantity.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity
+                }))
+            });
+            
+            showMessage('XLSX downloaded successfully!', 'success');
         }
 
-        // --- SECRET IMPORT BUTTON LOGIC ---
-        let secretClickCount = 0;
-        let lastClickTime = 0;
-        let importButtonTimeout;
-
-        function showImportButton() {
-            const importButton = document.getElementById('importSecretBtn');
-            if (importButton) {
-                importButton.style.display = 'block';
-                showMessage('Import button temporarily unlocked!', 'success');
-
-                // Clear any existing timeout to avoid multiple timers
-                if (importButtonTimeout) {
-                    clearTimeout(importButtonTimeout);
-                }
-
-                // Automatically hide the button after 15 seconds of inactivity
-                importButtonTimeout = setTimeout(() => {
-                    hideImportButton();
-                }, 15000); // 15 seconds
-            }
-        }
-
-        function hideImportButton() {
-            const importButton = document.getElementById('importSecretBtn');
-            if (importButton) {
-                importButton.style.display = 'none';
-            }
-            // Clear the timeout if hidden manually (e.g., after use)
-            if (importButtonTimeout) {
-                clearTimeout(importButtonTimeout);
-            }
-        }
-
-        // Add event listener to the main container
-        document.querySelector('.container').addEventListener('click', (e) => {
-            // Ignore clicks on interactive elements to not interfere with their function
-            // and to only register clicks on "blank" space.
-            if (e.target.closest('button, input, select, textarea, .item')) {
-                return;
-            }
-
-            const currentTime = new Date().getTime();
-            const timeSinceLastClick = currentTime - lastClickTime;
-
-            // Reset counter if clicks are too far apart
-            if (timeSinceLastClick > 400) { // 400ms interval for "fast" clicks
-                secretClickCount = 0;
-            }
-
-            secretClickCount++;
-            lastClickTime = currentTime;
-
-            if (secretClickCount === 5) {
-                showImportButton();
-                secretClickCount = 0; // Reset after triggering
-            }
-        });
+        // Import button is now always visible, no secret functionality needed
     </script>
 </body>
 </html>
