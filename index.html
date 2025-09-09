@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBLU SELECT Sangeli Housekeeping List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0e0e10;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff4bd8;
+            font-size: 24px;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1a1a1d;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 120px;
+        }
+
+        .title-presets {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-button {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #333;
+            color: #ccc;
+            border: 1px solid #444;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .preset-button:hover {
+            background: #ff4bd8;
+            color: #fff;
+            border-color: #ff4bd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 75, 216, 0.3);
+        }
+
+        .preset-button.active {
+            background: linear-gradient(135deg, #ff4bd8, #e03ab7);
+            color: #fff;
+            border-color: #e03ab7;
+            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .pantry-presets {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            gap: 8px;
+        }
+
+        .pantry-button {
+            height: 52px;
+            width: 120px;
+            line-height: 1.4;
+            padding: 6px 10px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .input-section {
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #333;
+            color: #fff;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+
+        #pantryNumber, #personName {
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            background: #3a3a3a;
+        }
+
+        input:focus {
+            border-color: #ff4bd8;
+            outline: none;
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .item {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-left: 2px solid #ff4bd8;
+            border-radius: 4px;
+            align-items: center;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 10px;
+            color: #fff;
+            word-break: break-word;
+            line-height: 1.1;
+            padding-right: 3px;
+        }
+
+        .item-name.highlight {
+            color: #ffaaaa;
+        }
+
+        .item-quantity {
+            width: 40px;
+            padding: 4px;
+            text-align: center;
+            font-weight: bold;
+            color: #ff4bd8;
+            background-color: #3a3a3a;
+            border: 1px solid #ff4bd850;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        button {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #ff4bd8, #e03ab7);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #e03ab7, #c92ea3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 75, 216, 0.4);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 75, 216, 0.3);
+        }
+
+        button.admin {
+            background-color: #ff4bd8;
+        }
+
+        button.admin:hover:not(:disabled) {
+            background-color: #e03ab7;
+        }
+
+        .message {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .success { background: #2ecc71; }
+        .error { background: #e74c3c; }
+
+        .floating-buttons {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-around;
+            width: 50%;
+            max-width: 220px;
+            min-width: 160px;
+            padding: 3px;
+            background: rgba(26, 26, 29, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .floating-buttons.active {
+            opacity: 1;
+        }
+
+        .floating-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #ff4bd8;
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.2s;
+            margin: 0 3px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .password-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a1d;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            margin: 10px 0;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #333;
+            color: #fff;
+        }
+
+        .modal-content .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .modal-content button {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .admin-menu {
+            display: block;
+            visibility: hidden;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a1a1d;
+            padding: 15px;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out, visibility 0.3s;
+        }
+
+        .admin-menu.active {
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .admin-menu h2 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #ff4bd8;
+        }
+
+        .admin-button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .admin-menu button {
+            margin: 0;
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .admin-menu input, .admin-menu textarea, .admin-menu select {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 10px auto;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #333;
+            color: #fff;
+            display: block;
+        }
+
+        .admin-menu textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        @media (max-width: 500px) {
+            .item-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .action-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .floating-buttons {
+                width: 80%;
+                min-width: 180px;
+            }
+            .floating-button {
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+            .pantry-button {
+                width: calc(50% - 4px);
+            }
+            .modal-content {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OBLU SELECT SANGELI HOUSEKEEPING LIST</h1>
+
+        <div class="title-presets">
+            <button class="preset-button" onclick="setTitle('Trolley & Tricycle Inventory', this)">Trolley & Tricycle</button>
+            <button class="preset-button" onclick="setTitle('Pantry Request', this)">Pantry Request</button>
+            <button class="preset-button" onclick="setTitle('Pantry Inventory', this)">Pantry Inventory</button>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="pdfTitle" placeholder="List Title">
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="personName" placeholder="Filled by (Name)">
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="pantryNumber" placeholder="Pantry Number">
+            </div>
+
+            <div class="title-presets pantry-presets">
+                <button class="preset-button pantry-button" onclick="setPantryNumber('Water Villa - 1st Pantry', this)">Water Villa<br>1st Pantry</button>
+                <button class="preset-button pantry-button" onclick="setPantryNumber('Water Villa - 2nd Pantry', this)">Water Villa<br>2nd Pantry</button>
+                <button class="preset-button pantry-button" onclick="setPantryNumber('Beach Villa - 1st Pantry', this)">Beach Villa<br>1st Pantry</button>
+                <button class="preset-button pantry-button" onclick="setPantryNumber('Beach Villa - 2nd Pantry', this)">Beach Villa<br>2nd Pantry</button>
+            </div>
+        </div>
+
+        <div class="item-grid" id="itemList"></div>
+
+        <div class="action-buttons">
+            <button onclick="copyList()">Copy</button>
+            <button id="importSecretBtn" onclick="importList()" style="display:none;">Import</button>
+            <button onclick="resetList()">Reset</button>
+            <button onclick="exportPDF()">PDF</button>
+            <button onclick="exportXLSX()">XLSX</button>
+            <button onclick="toggleAdmin()" id="adminBtn" class="admin">Admin</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <div class="floating-buttons" id="floatingButtons">
+        <button class="floating-button" title="Export PDF" onclick="exportPDF()">📄</button>
+        <button class="floating-button" title="Export XLSX" onclick="exportXLSX()">📊</button>
+        <button class="floating-button" title="Copy List" onclick="copyList()">📋</button>
+    </div>
+
+    <div class="password-modal" id="passwordModal">
+        <div class="modal-content">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Enter Password">
+            <div class="modal-buttons">
+                <button onclick="verifyAdmin()">Login</button>
+                <button onclick="closePasswordModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-menu" id="adminMenu">
+        </div>
+
+    <script id="appData">
+        let appData = {
+            trolleyItems: [
+                { name: "Shampoo 300Ml", displayName: "Shampoo 300Ml", fullName: "Shampoo 300Ml Company Noir", quantity: 0 }, 
+                { name: "Conditioner 300Ml", displayName: "Conditioner 300Ml", fullName: "Conditioner 300Ml Company Noir", quantity: 0 }, 
+                { name: "Shower Gel 300Ml", displayName: "Shower Gel 300Ml", fullName: "Shower Gel 300Ml Company Noir", quantity: 0 }, 
+                { name: "Hand & Body Lotion 300Ml", displayName: "Hand & Body Lotion 300Ml", fullName: "Hand & Body Lotion 300Ml Company Noir", quantity: 0 }, 
+                { name: "Cleansing Hand Wash 300Ml", displayName: "Cleansing Hand Wash 300Ml", fullName: "Cleansing Hand Wash 300Ml Company Noir", quantity: 0 }, 
+                { name: "Soap Wrapped 306", displayName: "Soap Wrapped 306", fullName: "Soap Wrapped 306 Company Noir", quantity: 0 }, 
+                { name: "Vanity Pack - A", displayName: "Vanity Pack - A", fullName: "Kimirica White Gold Vanity Pack - A", quantity: 0 }, 
+                { name: "Premium Shower Cap", displayName: "Premium Shower Cap", fullName: "Kimirica White Gold Premium Shower Cap", quantity: 0 }, 
+                { name: "Sanitary Bag", displayName: "Sanitary Bag", fullName: "Kimirica White Gold Sanitary Bag", quantity: 0 }, 
+                { name: "Standard Toothbrush Pack", displayName: "Standard Toothbrush Pack", fullName: "Kimirica White Gold Standard Toothbrush Pack", quantity: 0 }, 
+                { name: "Razor Pack", displayName: "Razor Pack", fullName: "Kimirica Razor Pack", quantity: 0 }, 
+                { name: "Comb Kit", displayName: "Comb Kit", fullName: "Comb Kit", quantity: 0 }, 
+                { name: "Stich Kit", displayName: "Stich Kit", fullName: "Stich Kit", quantity: 0 }, 
+                { name: "Natural Loofah Kit", displayName: "Natural Loofah Kit", fullName: "Natural Loofah Kit", quantity: 0 }, 
+                { name: "LipBam", displayName: "LipBam", fullName: "LipBam", quantity: 0 }, 
+                { name: "Sunscreen Lotion", displayName: "Sunscreen Lotion", fullName: "Sunscreen Lotion", quantity: 0 }, 
+                { name: "Insect Repellent Lotion", displayName: "Insect Repellent Lotion", fullName: "Insect Repellent Lotion", quantity: 0 }, 
+                { name: "Facial Tissue Cube Box", displayName: "Facial Tissue Cube Box", fullName: "Scott Facial Tissue Cube Box 90 Sheets", quantity: 0 }, 
+                { name: "Toilet Roll", displayName: "Toilet Roll", fullName: "Smartchoice Toilet Roll 2 Ply - 1x80 Rolls", quantity: 0 }, 
+                { name: "Milk Portion Rainbow 14g", displayName: "Milk Portion Rainbow 14g", fullName: "Milk Portion Rainbow 14g", quantity: 0 }, 
+                { name: "Espresso Cremoso 50 Cap", displayName: "Espresso Cremoso 50 Cap", fullName: "Coffee Espresso Cremoso 50 Cap", quantity: 0 }, 
+                { name: "Espresso Decaffeinato 50 Cap", displayName: "Espresso Decaffeinato 50 Cap", fullName: "Coffee Espresso Decaffeinato 50 Cap", quantity: 0 }, 
+                { name: "Espresso Intenso 50 Cap", displayName: "Espresso Intenso 50 Cap", fullName: "Coffee Espresso Intenso 50 Cap", quantity: 0 }, 
+                { name: "Segafredo Le Origini Brasil Capsules", displayName: "Segafredo Le Origini Brasil Capsules", fullName: "Coffee Segafredo Le Origini Brasil Capsules 6gmx50", quantity: 0, highlight: true }, 
+                { name: "Segafredo Espresso Capsules", displayName: "Segafredo Espresso Capsules", fullName: "Coffee Segafredo Espresso Capsules 6gmx50", quantity: 0, highlight: true }, 
+                { name: "Segafredo Decaffeinated Capsules", displayName: "Segafredo Decaffeinated Capsules", fullName: "Coffee Segafredo Decaffeinated Capsules 6gmx50", quantity: 0, highlight: true }, 
+                { name: "Sugar Brown", displayName: "Sugar Brown", fullName: "Sugar Brown Sachets - 5G", quantity: 0 }, 
+                { name: "Sugar White", displayName: "Sugar White", fullName: "Sugar White Sachets - 5G", quantity: 0 }, 
+                { name: "Equival Sugar", displayName: "Equival Sugar", fullName: "Sugar Equival Sugar 10g", quantity: 0 }, 
+                { name: "English Breakfast Tea", displayName: "English Breakfast Tea", fullName: "Ravena English Breakfast Tea 2g (1*250)", quantity: 0 }, 
+                { name: "Peppermint Tea", displayName: "Peppermint Tea", fullName: "Ravena Peppermint (Black Tea) 1.8g (1*250)", quantity: 0 }, 
+                { name: "Green Tea", displayName: "Green Tea", fullName: "Ravena Pur Green Tea 2g (1*250)", quantity: 0 }, 
+                { name: "Chamomile Tea", displayName: "Chamomile Tea", fullName: "Ravena Chamomile (Herbal Tea)", quantity: 0 }, 
+                { name: "Earl Grey Tea", displayName: "Earl Grey Tea", fullName: "Ravena Earl Grey", quantity: 0 }, 
+                { name: "Garbage Bag SMALL", displayName: "Garbage Bag SMALL", fullName: "Garbage Bag Green Colour 19cm x 22cm - SMALL", quantity: 0 }
+            ],
+            pantryItems: [
+                { name: "Shampoo Noir (3ltr, Gellon)", quantity: 0 }, { name: "Conditioner Noir(3ltr, Gellon)", quantity: 0 }, { name: "Shower Gel Noir (3ltr, Gellon)", quantity: 0 }, { name: "Hand & Body Lotion Noir (3ltr, Gellon)", quantity: 0 }, { name: "Cleansing Hand Noir (3ltr, Gellon)", quantity: 0 }, { name: "Soap Wrapped 30G Noir", quantity: 0 }, { name: "Shampoo Noir (300ml)", quantity: 0 }, { name: "Conditioner Noir(300ml)", quantity: 0 }, { name: "Shower Gel Noir(300ml)", quantity: 0 }, { name: "Hand & Body Lotion Noir(300ml)", quantity: 0 }, { name: "Cleansing Hand Noir (300ml)", quantity: 0 }, { name: "Kimnica White Gold Standard Toothbrush Pack", quantity: 0 }, { name: "Kimnica Razor Pack(on request)", quantity: 0 }, { name: "Stich kit(on request)", quantity: 0 }, { name: "Wooden Comb kit(on request)", quantity: 0 }, { name: "Natural Lordah kit(on request)", quantity: 0 }, { name: "Sunscreen lotion(on request)", quantity: 0 }, { name: "Insect repellent lotion(on request)", quantity: 0 }, { name: "Lip Balm", quantity: 0 }, { name: "Bathroom Slippers Kit Size 10", quantity: 0 }, { name: "Bathroom Slippers Kit Size 11", quantity: 0 }, { name: "Scott Facial Tissue Cube Box 90 Sheets(48)", quantity: 0 }, { name: "Kleenex bathroom Tissue 2ply - 50Opulls x 20rolls x 4bags", quantity: 0 }, { name: "Milk Portion Rainbow 14g", quantity: 0 }, { name: "Coffee Espresso Cremoso 50 Cap - Vergnano", quantity: 0 }, { name: "Coffee Espresso Decaffeinated 50 Cap - Vergnano", quantity: 0 }, { name: "Coffee Espresso Intenso 50 Cap - Vergnano", quantity: 0 }, { name: "Coffee Segafredo Le Origini Brasil Capsules 6gmx50", quantity: 0 }, { name: "Coffee Segafredo Espresso Capsules 6gmx150", quantity: 0 }, { name: "Coffee Segafredo Decaffeinated Capsules 6gmx50", quantity: 0 }, { name: "Sugar Brown Sachets - 5G", quantity: 0 }, { name: "Sugar White Sachets - 5G", quantity: 0 }, { name: "Sugar Equal Sugar 10g", quantity: 0 }, { name: "Ravena Tea English Breakfast Bag", quantity: 0 }, { name: "Ravena Tea Green tea", quantity: 0 }, { name: "Ravena Charnomile (Herbal Tea)", quantity: 0 }, { name: "Ravena Tea permit", quantity: 0 }, { name: "Mosquito Spray - 640ml / 400ml(only beach villas)", quantity: 0 }, { name: "outdoor slipper - 10\" - Orange colour", quantity: 0 }, { name: "outdoor slipper - 11\" - Blue colour", quantity: 0 }, { name: "Canvas Beach Bag 57 X 12X 40cm", quantity: 0 }, { name: "Laundry Bag with the Logo/without Logo", quantity: 0 }, { name: "Brasso", quantity: 0 }, { name: "R1", quantity: 0 }, { name: "R2", quantity: 0 }, { name: "R3", quantity: 0 }, { name: "R4", quantity: 0 }, { name: "R5", quantity: 0 }, { name: "R6", quantity: 0 }, { name: "R7", quantity: 0 }, { name: "Dustin Bag", quantity: 0 }, { name: "Bubble Bath", quantity: 0 }
+            ],
+            exportStyles: { pdf: "default", xlsx: "default" }
+        };
+    </script>
+
+    <script>
+        const ADMIN_PASSWORD = "000000";
+        let isAdmin = false;
+        let items = appData.trolleyItems;
+
+        // --- PRESET AND STATE MANAGEMENT FUNCTIONS ---
+        function setTitle(newTitle, clickedButton) {
+            document.getElementById('pdfTitle').value = newTitle;
+
+            const presetButtons = document.querySelectorAll('.preset-button:not(.pantry-button)');
+            presetButtons.forEach(b => b.classList.remove('active'));
+
+            const buttonToActivate = clickedButton || [...presetButtons].find(b => b.textContent === newTitle);
+            if (buttonToActivate) buttonToActivate.classList.add('active');
+
+            // Show/hide pantry section based on title - person name always visible
+            const pantryInput = document.querySelector('.input-group:has(#pantryNumber)');
+            const pantryPresets = document.querySelector('.title-presets.pantry-presets');
+
+            if (newTitle === 'Trolley & Tricycle Inventory') {
+                // Hide only pantry-related elements
+                pantryInput.style.display = 'none';
+                pantryPresets.style.display = 'none';
+                items = appData.trolleyItems;
+            } else if (newTitle === 'Pantry Request' || newTitle === 'Pantry Inventory') {
+                // Show pantry elements
+                pantryInput.style.display = 'flex';
+                pantryPresets.style.display = 'flex';
+                items = appData.pantryItems;
+            } else {
+                // Hide pantry elements for other titles
+                pantryInput.style.display = 'none';
+                pantryPresets.style.display = 'none';
+                items = appData.trolleyItems;
+            }
+            renderItems();
+            updateFloatingButtons();
+        }
+
+        function setPantryNumber(pantryName, clickedButton) {
+            document.getElementById('pantryNumber').value = pantryName;
+            updatePantryButtonState(pantryName);
+            if (clickedButton) clickedButton.classList.add('active');
+        }
+
+        function updatePantryButtonState(pantryName) {
+            const pantryButtons = document.querySelectorAll('.pantry-button');
+            pantryButtons.forEach(b => {
+                const buttonText = b.textContent.replace(/<br\s*\/?>|\n/g, " ").replace(/\s+/g, ' ').trim();
+                if (buttonText === pantryName.trim()) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+        }
+
+        window.onload = function() {
+            setTitle('Trolley & Tricycle Inventory', document.querySelector('.preset-button'));
+            updateFloatingButtons();
+            showAdminMenu(); // Pre-populate admin menu so it's ready
+            document.getElementById('adminMenu').classList.remove('active');
+        };
+
+        function renderItems() {
+            const container = document.getElementById('itemList');
+            container.innerHTML = '';
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                const displayName = item.displayName || item.name;
+                const highlightClass = item.highlight ? ' highlight' : '';
+                itemDiv.innerHTML = `
+                    <div class="item-name${highlightClass}">${displayName}</div>
+                    <input type="number" class="item-quantity" value="${item.quantity}" 
+                           min="0" data-index="${index}" onchange="updateQuantity(${index}, this.value)">
+                    ${isAdmin ? `<button class="floating-button" style="width: 30px; height: 30px; font-size: 16px;" onclick="removeItem(${index})" title="Remove Item">×</button>` : ''}`;
+                container.appendChild(itemDiv);
+            });
+            document.querySelectorAll('.item-quantity').forEach(input => {
+                input.addEventListener('focus', function() { if (this.value === '0') this.value = ''; });
+                input.addEventListener('blur', function() { if (this.value === '') { this.value = '0'; updateQuantity(this.dataset.index, 0); } });
+                input.addEventListener('input', updateFloatingButtons);
+            });
+        }
+
+        function updateQuantity(index, value) {
+            items[index].quantity = parseInt(value) || 0;
+            updateFloatingButtons();
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            setTimeout(() => msg.textContent = '', 3000);
+        }
+
+        function resetList() {
+            if (confirm('Reset all quantities for the current list to zero?')) {
+                items.forEach(item => item.quantity = 0);
+                renderItems();
+                updateFloatingButtons();
+                showMessage('All quantities reset!', 'success');
+            }
+        }
+
+        // --- COPY AND IMPORT FUNCTIONS ---
+        function copyList() {
+            const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
+            const personName = document.getElementById('personName').value.trim() || 'N/A';
+            const pantryNum = document.getElementById('pantryNumber').value.trim() || 'N/A';
+            const hasItems = items.some(item => item.quantity > 0);
+
+            if (!hasItems) {
+                showMessage('No items with quantities to copy. Add some quantities first.', 'error');
+                return;
+            }
+
+            let textToCopy = `Title: ${title}\n`;
+            textToCopy += `Person Name: ${personName}\n`;
+            textToCopy += `Pantry Number: ${pantryNum}\n`;
+            textToCopy += `Date: ${new Date().toLocaleString('en-US', { timeZone: 'Indian/Maldives' })}\n`;
+            textToCopy += '---\n';
+
+            // Only include items with quantities > 0 for cleaner copy
+            const itemsWithQuantity = items.filter(item => item.quantity > 0);
+            itemsWithQuantity.forEach(item => {
+                const exportName = item.fullName || item.name;
+                textToCopy += `${exportName}: ${item.quantity}\n`;
+            });
+
+            // Add summary
+            textToCopy += `\n--- Summary ---\n`;
+            textToCopy += `Total Items: ${itemsWithQuantity.length}\n`;
+            textToCopy += `Total Quantity: ${itemsWithQuantity.reduce((sum, item) => sum + item.quantity, 0)}\n`;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showMessage(`Copied ${itemsWithQuantity.length} items with quantities!`, 'success');
+                }).catch(() => fallbackCopyTextToClipboard(textToCopy));
+            } else {
+                fallbackCopyTextToClipboard(textToCopy);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; 
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+            } catch (err) {
+                successful = false;
+            }
+            document.body.removeChild(textArea);
+            if (successful) {
+                showMessage('Full state copied!', 'success');
+            } else {
+                showMessage('Copy failed. A box will pop up.', 'error');
+                window.prompt("Automatic copy failed. Please press Ctrl+C to copy:", text);
+            }
+        }
+
+        function importList() {
+            hideImportButton(); // Hide button as soon as it's used
+            const pastedText = window.prompt("Paste your list here to import the full state:", "");
+            if (!pastedText || pastedText.trim() === '') {
+                showMessage('Import cancelled or empty input.', 'error');
+                return;
+            }
+
+            const lines = pastedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            let headerParsed = false;
+            const quantityMap = new Map();
+            let importedCount = 0;
+            let newItemsAdded = 0;
+            let titleChanged = false;
+            let hasValidData = false;
+
+            for (const line of lines) {
+                if (line === '---') {
+                    headerParsed = true;
+                    continue;
+                }
+
+                if (!headerParsed) {
+                    if (line.startsWith('Title:')) {
+                        const newTitle = line.substring(6).trim();
+                        const currentTitle = document.getElementById('pdfTitle').value.trim();
+                        if (newTitle && newTitle !== currentTitle) {
+                            setTitle(newTitle);
+                            titleChanged = true;
+                        }
+                    } else if (line.startsWith('Person Name:')) {
+                        const personName = line.substring(12).trim();
+                        if (personName && personName !== 'N/A') {
+                            document.getElementById('personName').value = personName;
+                        }
+                    } else if (line.startsWith('Pantry Number:')) {
+                        const newPantry = line.substring(14).trim();
+                        if (newPantry && newPantry !== 'N/A') {
+                            document.getElementById('pantryNumber').value = newPantry;
+                            updatePantryButtonState(newPantry);
+                        }
+                    }
+                } else {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex === -1) continue;
+
+                    const name = line.substring(0, colonIndex).trim();
+                    const quantityStr = line.substring(colonIndex + 1).trim();
+                    const quantity = parseInt(quantityStr, 10);
+
+                    if (name && !isNaN(quantity) && quantity >= 0) {
+                        quantityMap.set(name, quantity);
+                        hasValidData = true;
+                    }
+                }
+            }
+
+            if (!hasValidData) {
+                showMessage('No valid item data found in import text.', 'error');
+                return;
+            }
+
+            // First, try to match existing items by full name, display name, or name
+            items.forEach(item => {
+                const itemNames = [
+                    item.fullName,
+                    item.displayName,
+                    item.name
+                ].filter(Boolean);
+
+                for (const itemName of itemNames) {
+                    if (quantityMap.has(itemName)) {
+                        item.quantity = quantityMap.get(itemName);
+                        quantityMap.delete(itemName); // Remove from map so we don't add it as new item
+                        importedCount++;
+                        break;
+                    }
+                }
+            });
+
+            // Add any remaining items as new items (if admin is logged in)
+            if (isAdmin && quantityMap.size > 0) {
+                quantityMap.forEach((quantity, name) => {
+                    if (quantity > 0) { // Only add items with non-zero quantities
+                        items.push({ 
+                            name: name, 
+                            displayName: name,
+                            quantity: quantity 
+                        });
+                        newItemsAdded++;
+                    }
+                });
+            }
+
+            renderItems();
+            updateFloatingButtons();
+
+            let successMessage = `Successfully imported ${importedCount} quantities`;
+            if (titleChanged) successMessage += `, switched to correct menu`;
+            if (newItemsAdded > 0) successMessage += `, added ${newItemsAdded} new items`;
+            if (!isAdmin && quantityMap.size > 0) {
+                successMessage += `. Note: ${quantityMap.size} unmatched items ignored (admin access required to add new items)`;
+            }
+            successMessage += '.';
+
+            showMessage(successMessage, 'success');
+        }
+
+        // --- FLOATING BUTTONS ---
+        function updateFloatingButtons() {
+            const floatingButtons = document.getElementById('floatingButtons');
+            const hasNonZero = items.some(item => item.quantity > 0);
+            floatingButtons.classList.toggle('active', hasNonZero);
+        }
+
+        // This function is no longer used by the floating buttons but is kept for potential future use.
+        function adjustAllQuantities(delta) {
+            items.forEach(item => {
+                item.quantity = Math.max(0, item.quantity + delta);
+            });
+            renderItems();
+            updateFloatingButtons();
+        }
+
+        // --- SYNC FUNCTIONS ---
+        function syncTrolleyItemsToPantry() {
+            let addedCount = 0;
+            const addedItems = [];
+
+            appData.trolleyItems.forEach(trolleyItem => {
+                // Check if this item already exists in pantry items
+                const existsInPantry = appData.pantryItems.some(pantryItem => 
+                    pantryItem.name === trolleyItem.name || 
+                    pantryItem.name === trolleyItem.displayName ||
+                    pantryItem.name === trolleyItem.fullName
+                );
+
+                if (!existsInPantry) {
+                    // Add the item to pantry with quantity 0
+                    appData.pantryItems.push({
+                        name: trolleyItem.name,
+                        displayName: trolleyItem.displayName,
+                        fullName: trolleyItem.fullName,
+                        quantity: 0,
+                        highlight: trolleyItem.highlight
+                    });
+                    addedCount++;
+                    addedItems.push(trolleyItem.name);
+                }
+            });
+
+            if (addedCount > 0) {
+                // If currently viewing pantry, refresh the display
+                const currentTitle = document.getElementById('pdfTitle').value.trim();
+                if (currentTitle.includes('Pantry')) {
+                    items = appData.pantryItems;
+                    renderItems();
+                }
+                
+                showMessage(`Synced ${addedCount} new items from Trolley to Pantry inventory`, 'success');
+                console.log('Added items:', addedItems);
+            } else {
+                showMessage('No new items to sync - pantry inventory is up to date', 'success');
+            }
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        function toggleAdmin() {
+            if (isAdmin) {
+                const adminMenu = document.getElementById('adminMenu');
+                if (adminMenu.classList.contains('active')) {
+                    adminMenu.classList.remove('active');
+                } else {
+                    showAdminMenu();
+                    adminMenu.classList.add('active');
+                }
+            } else {
+                document.getElementById('passwordModal').classList.add('active');
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function verifyAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('adminBtn').textContent = 'Admin Tools';
+                document.getElementById('adminBtn').style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                closePasswordModal();
+                document.getElementById('adminMenu').classList.add('active');
+                renderItems();
+                showMessage('Admin access granted!', 'success');
+            } else {
+                showMessage('Incorrect password!', 'error');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('adminBtn').textContent = 'Admin';
+            document.getElementById('adminBtn').style.background = 'linear-gradient(135deg, #ff4bd8, #e03ab7)';
+            document.getElementById('adminMenu').classList.remove('active');
+            renderItems();
+            showMessage('Logged out of admin mode.', 'success');
+        }
+
+        function showAddItemForm() {
+            document.getElementById('adminMenu').innerHTML = `
+                <h2>Add New Item</h2>
+                <input type="text" id="newItemName" placeholder="Enter item name">
+                <div class="admin-button-grid">
+                    <button onclick="addItem()">Add Item</button>
+                    <button onclick="showAdminMenu()">Cancel</button>
+                </div>
+            `;
+        }
+
+        function addItem() {
+            const itemName = document.getElementById('newItemName').value.trim();
+            if (!itemName) {
+                showMessage('Item name cannot be empty!', 'error');
+                return;
+            }
+            if (items.some(item => item.name.toLowerCase() === itemName.toLowerCase())) {
+                showMessage('Item already exists!', 'error');
+                return;
+            }
+            items.push({ name: itemName, quantity: 0 });
+            renderItems();
+            showAdminMenu();
+            showMessage(`Item "${itemName}" added!`, 'success');
+        }
+
+        function showRemoveItemForm() {
+            let selectOptions = '<option value="">Select item to remove...</option>';
+            items.forEach((item, index) => {
+                selectOptions += `<option value="${index}">${item.name}</option>`;
+            });
+            document.getElementById('adminMenu').innerHTML = `
+                <h2>Remove Existing Item</h2>
+                <select id="removeItemSelect">${selectOptions}</select>
+                <div class="admin-button-grid">
+                    <button onclick="removeItem()">Remove Selected</button>
+                    <button onclick="showAdminMenu()">Cancel</button>
+                </div>
+            `;
+        }
+
+        function removeItem(index) {
+            if (index === undefined) {
+                const select = document.getElementById('removeItemSelect');
+                index = select ? select.value : null;
+            }
+            if (index !== null && index !== "" && confirm(`Remove "${items[index].name}" from the list?`)) {
+                items.splice(index, 1);
+                renderItems();
+                // If the remove was triggered from the menu, refresh the menu view
+                if (document.getElementById('removeItemSelect')) {
+                    showAdminMenu();
+                }
+                showMessage('Item removed!', 'success');
+            }
+        }
+
+        function showBulkAddForm() {
+            document.getElementById('adminMenu').innerHTML = `
+                <h2>Bulk Add Items</h2>
+                <textarea id="bulkItems" placeholder="Enter item names, one per line"></textarea>
+                <div class="admin-button-grid">
+                    <button onclick="bulkAddItems()">Add All</button>
+                    <button onclick="showAdminMenu()">Cancel</button>
+                </div>
+            `;
+        }
+
+        function bulkAddItems() {
+            const itemText = document.getElementById('bulkItems').value.trim();
+            if (!itemText) {
+                showMessage('No items entered!', 'error');
+                return;
+            }
+            const itemNames = itemText.split('\n').map(name => name.trim()).filter(name => name);
+            let addedCount = 0;
+            itemNames.forEach(name => {
+                if (!items.some(item => item.name.toLowerCase() === name.toLowerCase())) {
+                    items.push({ name, quantity: 0 });
+                    addedCount++;
+                }
+            });
+            renderItems();
+            showAdminMenu();
+            showMessage(`Added ${addedCount} new items!`, 'success');
+        }
+
+        function showAdminMenu() {
+            document.getElementById('adminMenu').innerHTML = `
+                <h2>Admin Panel</h2>
+                <div class="admin-button-grid">
+                    <button onclick="showAddItemForm()">Add Item</button>
+                    <button onclick="showRemoveItemForm()">Remove Item</button>
+                    <button onclick="showBulkAddForm()">Bulk Add</button>
+                    <button onclick="syncTrolleyItemsToPantry()">Sync Trolley→Pantry</button>
+                    <button onclick="logoutAdmin()">Logout & Close</button>
+                </div>
+            `;
+        }
+
+        // --- EXPORT FUNCTIONS ---
+        function exportPDF() {
+            const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
+            const personName = document.getElementById('personName').value.trim();
+            const pantryNum = document.getElementById('pantryNumber').value.trim();
+
+            // Validation for required fields
+            if (!personName) {
+                showMessage('Please enter the filled by name before exporting PDF.', 'error');
+                document.getElementById('personName').focus();
+                return;
+            }
+
+            // Check if pantry number is required but missing
+            if ((title.includes('Pantry') || title.includes('pantry')) && !pantryNum) {
+                showMessage('Please enter the pantry number for pantry-related requests.', 'error');
+                document.getElementById('pantryNumber').focus();
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const date = new Date().toLocaleString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', timeZone: 'Indian/Maldives'
+            });
+
+            // Compact header styling
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text('OBLU SELECT Sangeli Housekeeping', doc.internal.pageSize.getWidth() / 2, 12, { align: 'center' });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text(title, doc.internal.pageSize.getWidth() / 2, 18, { align: 'center' });
+
+            let startY = 24;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+
+            if (pantryNum) {
+                doc.text(`Pantry Location: ${pantryNum}`, 12, startY);
+                startY += 4;
+            }
+            doc.text(`Filled By: ${personName}`, 12, startY);
+            doc.text(`Date: ${date}`, doc.internal.pageSize.getWidth() - 12, startY, { align: 'right' });
+
+            const tableData = items.map(item => [item.fullName || item.name, item.quantity]);
+
+            // Optimized single-page table configuration
+            const tableConfig = {
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: '#4A90E2', 
+                    textColor: '#FFFFFF', 
+                    fontStyle: 'bold', 
+                    fontSize: 9, 
+                    cellPadding: { top: 2, right: 3, bottom: 2, left: 3 },
+                    halign: 'center'
+                },
+                bodyStyles: { 
+                    fontSize: 7, 
+                    cellPadding: { top: 1.2, right: 3, bottom: 1.2, left: 3 },
+                    textColor: 40,
+                    lineColor: '#CCCCCC',
+                    lineWidth: 0.1
+                },
+                alternateRowStyles: {
+                    fillColor: '#F8F9FA'
+                },
+                columnStyles: { 
+                    0: { 
+                        cellWidth: 150, 
+                        halign: 'left',
+                        fontSize: 6.8
+                    }, 
+                    1: { 
+                        cellWidth: 30, 
+                        halign: 'center',
+                        fontStyle: 'bold',
+                        fontSize: 8
+                    } 
+                },
+                startY: startY + 5,
+                margin: { left: 12, right: 12 },
+                pageBreak: 'avoid',
+                showFoot: false,
+                tableWidth: 'auto',
+                styles: {
+                    overflow: 'linebreak',
+                    cellWidth: 'wrap',
+                    minCellHeight: 2.8,
+                    valign: 'middle'
+                }
+            };
+
+            doc.autoTable({
+                head: [["Item Description", "Qty"]],
+                body: tableData,
+                ...tableConfig
+            });
+
+            // Compact footer
+            const finalY = doc.lastAutoTable.finalY || startY + 50;
+            if (finalY < 280) {
+                doc.setFontSize(6);
+                doc.setTextColor(120);
+                doc.text('Generated by OBLU SELECT Sangeli Housekeeping System', doc.internal.pageSize.getWidth() / 2, 290, { align: 'center' });
+            }
+
+            const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const dateStr = new Date().toISOString().slice(0, 10);
+            doc.save(`${safePersonName}_${safeTitle}_${dateStr}.pdf`);
+            showMessage('PDF downloaded!', 'success');
+        }
+
+        function exportXLSX() {
+            const title = document.getElementById('pdfTitle').value.trim() || 'Pantry Request';
+            const personName = document.getElementById('personName').value.trim();
+
+            // Validation for required fields
+            if (!personName) {
+                showMessage('Please enter the filled by name before exporting XLSX.', 'error');
+                document.getElementById('personName').focus();
+                return;
+            }
+
+            if (title.startsWith('Trolley')) {
+                const date = new Date().toLocaleString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', timeZone: 'Indian/Maldives'
+                });
+
+                const header_data = [
+                    ["Title:", title],
+                    ["Name:", personName],
+                    ["Date:", date],
+                    [] // Blank spacer row
+                ];
+                const item_headers = [["Item Name", "Quantity"]];
+                // Convert quantity to a string to ensure '0' is exported correctly.
+                // Always use fullName for export, fallback to name if fullName doesn't exist
+                const item_data = items.map(i => [i.fullName || i.name, i.quantity.toString()]);
+                const ws_data = [...header_data, ...item_headers, ...item_data];
+
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                // Adjust column widths for better readability - bring quantity closer to item names
+                ws['!cols'] = [{ wch: 45 }, { wch: 12 }];
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Trolley Inventory");
+                const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const dateStr = new Date().toISOString().slice(0, 10);
+                XLSX.writeFile(wb, `${safePersonName}_${safeTitle}_${dateStr}.xlsx`);
+
+                showMessage('XLSX downloaded!', 'success');
+                return;
+            }
+
+            // Pantry Export Logic with validation
+            const pantryNum = document.getElementById('pantryNumber').value.trim();
+
+            // Check if pantry number is required but missing
+            if ((title.includes('Pantry') || title.includes('pantry')) && !pantryNum) {
+                showMessage('Please enter the pantry number for pantry-related requests.', 'error');
+                document.getElementById('pantryNumber').focus();
+                return;
+            }
+
+            const pantryNumDisplay = pantryNum || 'N/A';
+            const personNameDisplay = personName || 'N/A';
+            const wb = XLSX.utils.book_new();
+            const ws = {};
+            const addStyledCell = (cellRef, value, style = {}) => { ws[cellRef] = { v: value, t: 's', s: style }; };
+            const getStock = (itemName) => { const item = items.find(i => i.name === itemName); return item ? item.quantity : 0; };
+            let currentRow = 0;
+            currentRow++;
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 1 }), title, { font: { bold: true, sz: 18 }, alignment: { horizontal: 'center', vertical: 'center' } });
+            ws['!merges'] = [{ s: { r: currentRow, c: 1 }, e: { r: currentRow, c: 3 } }];
+            currentRow += 2;
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 0 }), 'Guest Supplies & Amenities', { font: { bold: true, sz: 14 }, alignment: { horizontal: 'left' } });
+            ws['!merges'].push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 3 } });
+            currentRow++;
+            currentRow++;
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 0 }), 'Pantry Number:', { font: { bold: true }, alignment: { horizontal: 'left' } });
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 1 }), pantryNumDisplay, { alignment: { horizontal: 'left' } });
+            ws['!merges'].push({ s: { r: currentRow, c: 1 }, e: { r: currentRow, c: 3 } });
+            currentRow++;
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 0 }), 'Filled By:', { font: { bold: true }, alignment: { horizontal: 'left' } });
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 1 }), personNameDisplay, { alignment: { horizontal: 'left' } });
+            ws['!merges'].push({ s: { r: currentRow, c: 1 }, e: { r: currentRow, c: 3 } });
+            currentRow += 2;
+            const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: "D3D3D3" } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } };
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 0 }), 'S.No', headerStyle);
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 1 }), 'Items', headerStyle);
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 2 }), 'Unit', headerStyle);
+            addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 3 }), 'Stock', headerStyle);
+            const dataSections = [
+                [[1, 'Shampoo Noir (3ltr, Gellon)', 'Gellon', getStock('Shampoo Noir (3ltr, Gellon)')], [2, 'Conditioner Noir(3ltr, Gellon)', 'Gellon', getStock('Conditioner Noir(3ltr, Gellon)')], [3, 'Shower Gel Noir (3ltr, Gellon)', 'Gellon', getStock('Shower Gel Noir (3ltr, Gellon)')], [4, 'Hand & Body Lotion Noir (3ltr, Gellon)', 'Gellon', getStock('Hand & Body Lotion Noir (3ltr, Gellon)')], [5, 'Cleansing Hand Noir (3ltr, Gellon)', 'Gellon', getStock('Cleansing Hand Noir (3ltr, Gellon)')], [6, 'Soap Wrapped 30G Noir', 'Nos', getStock('Soap Wrapped 30G Noir')], [7, 'Shampoo Noir (300ml)', 'Nos', getStock('Shampoo Noir (300ml)')], [8, 'Conditioner Noir(300ml)', 'Nos', getStock('Conditioner Noir(300ml)')], [9, 'Shower Gel Noir(300ml)', 'Nos', getStock('Shower Gel Noir(300ml)')], [10, 'Hand & Body Lotion Noir(300ml)', 'Nos', getStock('Hand & Body Lotion Noir(300ml)')], [11, 'Cleansing Hand Noir (300ml)', 'Nos', getStock('Cleansing Hand Noir (300ml)')], [12, 'Kimnica White Gold Standard Toothbrush Pack', 'Nos', getStock('Kimnica White Gold Standard Toothbrush Pack')], [13, 'Kimnica Razor Pack(on request)', 'Nos', getStock('Kimnica Razor Pack(on request)')], [14, 'Stich kit(on request)', 'Nos', getStock('Stich kit(on request)')], [15, 'Wooden Comb kit(on request)', 'Nos', getStock('Wooden Comb kit(on request)')], [16, 'Natural Lordah kit(on request)', 'Nos', getStock('Natural Lordah kit(on request)')], [17, 'Sunscreen lotion(on request)', 'Nos', getStock('Sunscreen lotion(on request)')], [18, 'Insect repellent lotion(on request)', 'Nos', getStock('Insect repellent lotion(on request)')], [19, 'Lip Balm', 'Nos', getStock('Lip Balm')], [20, 'Bathroom Slippers Kit Size 10', 'Nos', getStock('Bathroom Slippers Kit Size 10')], [21, 'Bathroom Slippers Kit Size 11', 'Nos', getStock('Bathroom Slippers Kit Size 11')], [22, 'Scott Facial Tissue Cube Box 90 Sheets(48)', 'Nos', getStock('Scott Facial Tissue Cube Box 90 Sheets(48)')], [23, 'Kleenex bathroom Tissue 2ply - 50Opulls x 20rolls x 4bags', 'Nos', getStock('Kleenex bathroom Tissue 2ply - 50Opulls x 20rolls x 4bags')], [24, 'Milk Portion Rainbow 14g', 'Nos', getStock('Milk Portion Rainbow 14g')], [25, 'Coffee Espresso Cremoso 50 Cap - Vergnano', 'Nos', getStock('Coffee Espresso Cremoso 50 Cap - Vergnano')], [26, 'Coffee Espresso Decaffeinated 50 Cap - Vergnano', 'Nos', getStock('Coffee Espresso Decaffeinated 50 Cap - Vergnano')], [27, 'Coffee Espresso Intenso 50 Cap - Vergnano', 'Nos', getStock('Coffee Espresso Intenso 50 Cap - Vergnano')], [28, 'Coffee Segafredo Le Origini Brasil Capsules 6gmx50', 'Nos', getStock('Coffee Segafredo Le Origini Brasil Capsules 6gmx50')], [29, 'Coffee Segafredo Espresso Capsules 6gmx150', 'Nos', getStock('Coffee Segafredo Espresso Capsules 6gmx150')], [30, 'Coffee Segafredo Decaffeinated Capsules 6gmx50', 'Nos', getStock('Coffee Segafredo Decaffeinated Capsules 6gmx50')], [31, 'Sugar Brown Sachets - 5G', 'Nos', getStock('Sugar Brown Sachets - 5G')], [32, 'Sugar White Sachets - 5G', 'Nos', getStock('Sugar White Sachets - 5G')], [33, 'Sugar Equal Sugar 10g', 'Nos', getStock('Sugar Equal Sugar 10g')], [34, 'Ravena Tea English Breakfast Bag', 'Nos', getStock('Ravena Tea English Breakfast Bag')], [35, 'Ravena Tea Green tea', 'Nos', getStock('Ravena Tea Green tea')], [36, 'Ravena Charnomile (Herbal Tea)', 'Nos', getStock('Ravena Charnomile (Herbal Tea)')], [37, 'Ravena Tea permit', 'Nos', getStock('Ravena Tea permit')], [38, 'Mosquito Spray - 640ml / 400ml(only beach villas)', 'Nos', getStock('Mosquito Spray - 640ml / 400ml(only beach villas)')], [39, 'outdoor slipper - 10" - Orange colour', 'Nos', getStock('outdoor slipper - 10" - Orange colour')], [40, 'outdoor slipper - 11" - Blue colour', 'Nos', getStock('outdoor slipper - 11" - Blue colour')], [41, 'Canvas Beach Bag 57 X 12X 40cm', 'Nos', getStock('Canvas Beach Bag 57 X 12X 40cm')], [42, 'Laundry Bag with the Logo/without Logo', 'Nos', getStock('Laundry Bag with the Logo/without Logo')], [43, 'Bubble Bath', 'Nos', getStock('Bubble Bath')], [44, 'Brasso', 'Nos', getStock('Brasso')], [45, 'R1', 'Nos', getStock('R1')],[46, 'R2', 'Nos', getStock('R2')],[47, 'R3', 'Nos', getStock('R3')], [48, 'R4', 'Nos', getStock('R4')],[49, 'R5', 'Nos', getStock('R5')],[50, 'R6', 'Nos', getStock('R6')], [51, 'R7', 'Nos', getStock('R7')],[52, 'Dustin Bag', 'Nos', getStock('Dustin Bag')]]
+            ];
+            // Dynamically add new items to the XLSX export
+            const existingItems = dataSections[0].map(row => row[1]);
+            items.forEach((item, index) => {
+                if (!existingItems.includes(item.name)) {
+                    dataSections[0].push([dataSections[0].length + 1, item.name, 'Nos', item.quantity]);
+                }
+            });
+            dataSections.forEach(section => section.forEach(rowData => {
+                currentRow++;
+                const baseStyle = { border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } };
+                addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 0 }), rowData[0], baseStyle);
+                addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 1 }), rowData[1], baseStyle);
+                addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 2 }), rowData[2], baseStyle);
+                addStyledCell(XLSX.utils.encode_cell({ r: currentRow, c: 3 }), rowData[3], baseStyle);
+            }));
+            ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: currentRow, c: 3 } });
+            ws['!cols'] = [{ wch: 5 }, { wch: 50 }, { wch: 10 }, { wch: 10 }];
+            XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+            const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const safePersonName = personNameDisplay.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const dateStr = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `${safePersonName}_${safeTitle}_${dateStr}.xlsx`);
+            showMessage('XLSX downloaded!', 'success');
+        }
+
+        // --- SECRET IMPORT BUTTON LOGIC ---
+        let secretClickCount = 0;
+        let lastClickTime = 0;
+        let importButtonTimeout;
+
+        function showImportButton() {
+            const importButton = document.getElementById('importSecretBtn');
+            if (importButton) {
+                importButton.style.display = 'block';
+                showMessage('Import button temporarily unlocked!', 'success');
+
+                // Clear any existing timeout to avoid multiple timers
+                if (importButtonTimeout) {
+                    clearTimeout(importButtonTimeout);
+                }
+
+                // Automatically hide the button after 15 seconds of inactivity
+                importButtonTimeout = setTimeout(() => {
+                    hideImportButton();
+                }, 15000); // 15 seconds
+            }
+        }
+
+        function hideImportButton() {
+            const importButton = document.getElementById('importSecretBtn');
+            if (importButton) {
+                importButton.style.display = 'none';
+            }
+            // Clear the timeout if hidden manually (e.g., after use)
+            if (importButtonTimeout) {
+                clearTimeout(importButtonTimeout);
+            }
+        }
+
+        // Add event listener to the main container
+        document.querySelector('.container').addEventListener('click', (e) => {
+            // Ignore clicks on interactive elements to not interfere with their function
+            // and to only register clicks on "blank" space.
+            if (e.target.closest('button, input, select, textarea, .item')) {
+                return;
+            }
+
+            const currentTime = new Date().getTime();
+            const timeSinceLastClick = currentTime - lastClickTime;
+
+            // Reset counter if clicks are too far apart
+            if (timeSinceLastClick > 400) { // 400ms interval for "fast" clicks
+                secretClickCount = 0;
+            }
+
+            secretClickCount++;
+            lastClickTime = currentTime;
+
+            if (secretClickCount === 5) {
+                showImportButton();
+                secretClickCount = 0; // Reset after triggering
+            }
+        });
+    </script>
+</body>
+</html>
