@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>OBLU SELECT Sangeli Housekeeping List</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -128,11 +130,14 @@
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 16px; /* Prevents iOS zoom */
             background: var(--bg-tertiary);
             color: var(--text-primary);
             width: 100%;
             transition: border-color 0.3s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         #pantryNumber, #personName {
@@ -624,14 +629,46 @@
                 itemDiv.innerHTML = `
                     <div class="item-name${highlightClass}">${displayName}</div>
                     <input type="number" class="item-quantity" value="${item.quantity}" 
-                           min="0" data-index="${index}" onchange="updateQuantity(${index}, this.value)">
+                           min="0" data-index="${index}" inputmode="numeric" pattern="[0-9]*">
                     ${isAdmin ? `<button class="floating-button" style="width: 30px; height: 30px; font-size: 16px;" onclick="removeItem(${index})" title="Remove Item">×</button>` : ''}`;
                 container.appendChild(itemDiv);
             });
             document.querySelectorAll('.item-quantity').forEach(input => {
-                input.addEventListener('focus', function() { if (this.value === '0') this.value = ''; });
-                input.addEventListener('blur', function() { if (this.value === '') { this.value = '0'; updateQuantity(this.dataset.index, 0); } });
-                input.addEventListener('input', updateFloatingButtons);
+                // iOS-compatible input handling
+                input.addEventListener('change', function() { 
+                    updateQuantity(this.dataset.index, this.value);
+                    updateFloatingButtons();
+                });
+                
+                // Debounced input for iOS
+                let inputTimeout;
+                input.addEventListener('input', function() {
+                    clearTimeout(inputTimeout);
+                    inputTimeout = setTimeout(() => {
+                        updateQuantity(this.dataset.index, this.value);
+                        updateFloatingButtons();
+                    }, 100);
+                });
+                
+                input.addEventListener('focus', function() { 
+                    if (this.value === '0') this.value = ''; 
+                    // Remove readonly for iOS keyboard
+                    this.removeAttribute('readonly');
+                });
+                
+                input.addEventListener('blur', function() { 
+                    if (this.value === '') { 
+                        this.value = '0'; 
+                        updateQuantity(this.dataset.index, 0); 
+                    }
+                    updateFloatingButtons();
+                });
+                
+                // Prevent iOS double-tap zoom on inputs
+                input.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.focus();
+                }, { passive: false });
             });
         }
 
@@ -710,29 +747,73 @@
         }
 
         function fallbackCopyTextToClipboard(text) {
+            // iOS-optimized clipboard fallback
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.position = "fixed"; 
-            textArea.style.left = "-9999px";
+            
+            // iOS-specific styling
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "100%";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            textArea.style.color = "transparent";
+            textArea.style.fontSize = "16px"; // Prevents iOS zoom
+            textArea.readOnly = false;
+            textArea.contentEditable = true;
+            textArea.style.opacity = "0";
+            textArea.style.pointerEvents = "none";
+            
             document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
+            
+            // iOS detection
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
             let successful = false;
+            
             try {
-                successful = document.execCommand('copy');
+                if (isIOS) {
+                    // iOS-specific selection
+                    textArea.contentEditable = true;
+                    textArea.readOnly = false;
+                    
+                    const range = document.createRange();
+                    range.selectNodeContents(textArea);
+                    
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    textArea.setSelectionRange(0, text.length);
+                    
+                    // Try to copy
+                    successful = document.execCommand('copy');
+                } else {
+                    textArea.focus();
+                    textArea.select();
+                    successful = document.execCommand('copy');
+                }
             } catch (err) {
+                console.error('Copy failed:', err);
                 successful = false;
             }
+            
+            // Clean up
             document.body.removeChild(textArea);
+            
             if (successful) {
-                // Save to history when fallback copy succeeds
                 const title = document.getElementById('pdfTitle').value.trim() || 'Housekeeping List';
                 const personName = document.getElementById('personName').value.trim();
                 const pantryNum = document.getElementById('pantryNumber').value.trim();
                 const itemsWithQuantity = items.filter(item => item.quantity > 0);
-                
-                if (personName) { // Only save if we have required data
-                    saveToHistory('Copy List (Fallback)', {
+
+                if (personName) {
+                    saveToHistory('Copy List', {
                         title: title,
                         personName: personName,
                         pantryNumber: pantryNum,
@@ -742,18 +823,90 @@
                         }))
                     });
                 }
-                
-                showMessage('List copied successfully!', 'success');
+
+                showMessage('✓ List copied successfully!', 'success');
             } else {
-                showMessage('Copy failed. A box will pop up.', 'error');
-                window.prompt("Automatic copy failed. Please press Ctrl+C to copy:", text);
+                // Show modal for manual copy on iOS
+                showCopyModal(text);
             }
         }
 
+        function showCopyModal(text) {
+            const modal = document.createElement('div');
+            modal.className = 'password-modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="width: 90%; max-width: 500px;">
+                    <h2>Copy List</h2>
+                    <p style="font-size: 12px; color: #ccc; margin-bottom: 10px;">Tap and hold the text below, then select "Copy All":</p>
+                    <textarea readonly style="width: 100%; height: 300px; padding: 10px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; font-family: monospace; -webkit-user-select: all; user-select: all;">${text}</textarea>
+                    <div class="modal-buttons" style="margin-top: 15px;">
+                        <button onclick="this.closest('.password-modal').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // iOS-optimized text selection
+            setTimeout(() => {
+                const textarea = modal.querySelector('textarea');
+                if (textarea) {
+                    textarea.focus();
+                    textarea.setSelectionRange(0, text.length);
+                    
+                    // Try to select all on iOS
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        const range = document.createRange();
+                        range.selectNodeContents(textarea);
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    } else {
+                        textarea.select();
+                    }
+                }
+            }, 300);
+        }
+
         function importList() {
-            const pastedText = window.prompt("Paste your list here to import the full state:", "");
+            // iOS-compatible import modal
+            const modal = document.createElement('div');
+            modal.className = 'password-modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="width: 90%; max-width: 500px;">
+                    <h2>Import List</h2>
+                    <p style="font-size: 12px; color: #ccc; margin-bottom: 10px;">Paste your copied list below:</p>
+                    <textarea id="importTextArea" placeholder="Paste your list here..." style="width: 100%; height: 200px; padding: 10px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; font-family: monospace; resize: vertical; -webkit-appearance: none;"></textarea>
+                    <div class="modal-buttons" style="margin-top: 15px;">
+                        <button onclick="processImport()">Import</button>
+                        <button onclick="closeImportModal()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // iOS-friendly focus with delay
+            setTimeout(() => {
+                const textarea = document.getElementById('importTextArea');
+                if (textarea) {
+                    textarea.focus();
+                    // Trigger click to ensure keyboard appears on iOS
+                    textarea.click();
+                }
+            }, 300);
+        }
+
+        function closeImportModal() {
+            const modal = document.querySelector('.password-modal.active');
+            if (modal && modal.querySelector('#importTextArea')) {
+                modal.remove();
+            }
+        }
+
+        function processImport() {
+            const pastedText = document.getElementById('importTextArea').value;
+            
             if (!pastedText || pastedText.trim() === '') {
-                showMessage('Import cancelled or empty input.', 'error');
+                showMessage('Please paste some content to import.', 'error');
                 return;
             }
 
@@ -845,6 +998,7 @@
 
             renderItems();
             updateFloatingButtons();
+            closeImportModal();
 
             let successMessage = `Successfully imported ${importedCount} quantities`;
             if (titleChanged) successMessage += `, switched to correct menu`;
@@ -1055,7 +1209,7 @@
             if (historySection) {
                 historySection.style.display = 'none';
             }
-            
+
             document.getElementById('adminMenu').innerHTML = `
                 <h2>Admin Panel</h2>
                 <div class="admin-button-grid">
@@ -1106,14 +1260,14 @@
                     dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Indian/Maldives' }),
                     dateOnly: new Date().toLocaleDateString('en-US', { timeZone: 'Indian/Maldives' })
                 };
-                
+
                 history.unshift(historyEntry);
-                
+
                 // Keep only last 200 entries (increased from 100)
                 if (history.length > 200) {
                     history.splice(200);
                 }
-                
+
                 localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
                 return historyEntry.id;
             } catch (error) {
@@ -1143,12 +1297,12 @@
 
         function getFilteredHistory() {
             let history = getHistoryFromStorage();
-            
+
             // Filter by action
             if (historyFilters.action !== 'all') {
                 history = history.filter(entry => entry.action.toLowerCase().includes(historyFilters.action.toLowerCase()));
             }
-            
+
             // Filter by date range
             if (historyFilters.dateRange !== 'all') {
                 const now = new Date();
@@ -1168,14 +1322,14 @@
                     history = history.filter(entry => new Date(entry.timestamp) >= cutoffDate);
                 }
             }
-            
+
             // Filter by person
             if (historyFilters.person !== 'all') {
                 history = history.filter(entry => 
                     entry.data.personName && entry.data.personName.toLowerCase().includes(historyFilters.person.toLowerCase())
                 );
             }
-            
+
             // Filter by search term
             if (historyFilters.searchTerm) {
                 const searchTerm = historyFilters.searchTerm.toLowerCase();
@@ -1187,7 +1341,7 @@
                     (entry.data.items && entry.data.items.some(item => item.name.toLowerCase().includes(searchTerm)))
                 );
             }
-            
+
             return history;
         }
 
@@ -1195,7 +1349,7 @@
             if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
                 localStorage.removeItem(HISTORY_STORAGE_KEY);
                 showMessage('History cleared successfully', 'success');
-                
+
                 // Refresh history displays
                 refreshHistoryDisplays();
             }
@@ -1234,7 +1388,7 @@
                         entry.data.totalQuantity || 0,
                         entry.data.sessionId || ''
                     ]);
-                    
+
                     content = [csvHeaders, ...csvRows].map(row => 
                         row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
                     ).join('\n');
@@ -1256,7 +1410,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 showMessage(`History downloaded successfully (${format.toUpperCase()})`, 'success');
             } catch (error) {
                 console.error('Error downloading history:', error);
@@ -1296,18 +1450,18 @@
                 report += `Total Items: ${entry.data.totalItems || 0}\n`;
                 report += `Total Quantity: ${entry.data.totalQuantity || 0}\n`;
                 report += `Session ID: ${entry.data.sessionId || 'N/A'}\n`;
-                
+
                 if (entry.data.items && entry.data.items.length > 0) {
                     report += `Items with quantities:\n`;
                     entry.data.items.forEach(item => {
                         report += `  - ${item.name}: ${item.quantity}\n`;
                     });
                 }
-                
+
                 if (entry.data.filename) {
                     report += `Generated File: ${entry.data.filename}\n`;
                 }
-                
+
                 report += `\n${'-'.repeat(40)}\n\n`;
             });
 
@@ -1327,19 +1481,19 @@
                 // User statistics
                 const user = entry.data.personName || 'Unknown';
                 userCounts[user] = (userCounts[user] || 0) + 1;
-                
+
                 // Action statistics
                 actionCounts[entry.action] = (actionCounts[entry.action] || 0) + 1;
-                
+
                 // Item and quantity statistics
                 totalItems += entry.data.totalItems || 0;
                 totalQuantity += entry.data.totalQuantity || 0;
-                
+
                 // Session tracking
                 if (entry.data.sessionId) {
                     sessions.add(entry.data.sessionId);
                 }
-                
+
                 // Date range
                 const entryDate = new Date(entry.timestamp);
                 if (!earliestDate || entryDate < earliestDate) earliestDate = entryDate;
@@ -1417,7 +1571,7 @@
                 showMessage('No entries selected for deletion', 'error');
                 return;
             }
-            
+
             if (confirm(`Delete ${selectedEntries.length} selected history entries?`)) {
                 try {
                     const history = getHistoryFromStorage();
@@ -1435,7 +1589,7 @@
         function showHistoryStats() {
             const history = getHistoryFromStorage();
             const stats = generateHistoryStats(history);
-            
+
             const statsHtml = `
                 <div style="background: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <h3 style="color: var(--primary-color); margin-bottom: 10px;">📊 History Statistics</h3>
@@ -1451,14 +1605,14 @@
                     </div>
                 </div>
             `;
-            
+
             return statsHtml;
         }
 
         function showHistoryList() {
             const history = getFilteredHistory();
             const historySection = document.getElementById('historySection');
-            
+
             if (!historySection) {
                 const adminMenu = document.getElementById('adminMenu');
                 const historyHTML = `
@@ -1495,7 +1649,7 @@
                     <div id="historyList" style="max-height: 400px; overflow-y: auto; border: 1px solid #444; border-radius: 6px; background: var(--bg-tertiary); padding: 10px;"></div>
                 `;
             }
-            
+
             document.getElementById('historySection').style.display = 'block';
             renderHistoryList(history);
         }
@@ -1504,7 +1658,7 @@
             const history = getHistoryFromStorage();
             const uniquePersons = [...new Set(history.map(h => h.data.personName).filter(Boolean))];
             const uniqueActions = [...new Set(history.map(h => h.action))];
-            
+
             return `
                 <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 8px;">
@@ -1536,7 +1690,7 @@
         function updateHistoryFilter(filterType, value) {
             historyFilters[filterType] = value;
             renderHistoryList(getFilteredHistory());
-            
+
             // Update the stats display
             const statsContainer = document.querySelector('#historySection .grid');
             if (statsContainer) {
@@ -1546,7 +1700,7 @@
 
         function renderHistoryList(history) {
             const historyList = document.getElementById('historyList');
-            
+
             if (history.length === 0) {
                 historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No history entries found with current filters</p>';
                 return;
@@ -1568,12 +1722,10 @@
                                 ${entry.data.totalItems > 0 ? `<span style="background: #4CAF50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">${entry.data.totalItems} items</span>` : ''}
                             </div>
                             <div style="display: flex; gap: 5px;">
-                                <button onclick="importFromHistoryEntry('${entry.id}')" 
-                                        style="background: #4CAF50; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Quick Import">📥</button>
                                 <button onclick="viewHistoryEntryDetails('${entry.id}')" 
-                                        style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="View Details">👁️</button>
+                                        style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;">👁️</button>
                                 <button onclick="deleteHistoryEntry('${entry.id}')" 
-                                        style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Delete">×</button>
+                                        style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;">×</button>
                             </div>
                         </div>
                         <div style="font-size: 10px; color: #888; margin-bottom: 5px;">
@@ -1622,7 +1774,7 @@
                             ${entry.data.filename ? `<div><strong>Generated File:</strong> ${entry.data.filename}</div>` : ''}
                         </div>
                         ${entry.data.items && entry.data.items.length > 0 ? `
-                            <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 6px;">
                                 <strong>Items (${entry.data.items.length} total, ${entry.data.totalQuantity} quantity):</strong>
                                 <div style="max-height: 200px; overflow-y: auto; margin-top: 8px;">
                                     ${entry.data.items.map(item => `
@@ -1634,117 +1786,15 @@
                                 </div>
                             </div>
                         ` : ''}
-                        <div style="display: flex; gap: 8px; margin-top: 15px; padding-top: 10px; border-top: 1px solid #444;">
-                            <button onclick="importFromHistoryEntry('${entry.id}')" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px;">
-                                📥 Import This Data
-                            </button>
-                            <button onclick="this.closest('.password-modal').remove()" style="flex: 1; background: #666; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px;">
-                                Close
-                            </button>
-                        </div>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         }
 
-        function importFromHistoryEntry(entryId) {
-            const history = getHistoryFromStorage();
-            const entry = history.find(h => h.id === entryId);
-            if (!entry) {
-                showMessage('History entry not found', 'error');
-                return;
-            }
-
-            try {
-                // Set the title and switch to appropriate menu
-                if (entry.data.title) {
-                    setTitle(entry.data.title);
-                }
-
-                // Set person name
-                if (entry.data.personName) {
-                    document.getElementById('personName').value = entry.data.personName;
-                }
-
-                // Set pantry number if available
-                if (entry.data.pantryNumber) {
-                    document.getElementById('pantryNumber').value = entry.data.pantryNumber;
-                    updatePantryButtonState(entry.data.pantryNumber);
-                }
-
-                // Reset all current quantities to 0
-                items.forEach(item => item.quantity = 0);
-
-                // Import the quantities from history
-                let importedCount = 0;
-                let newItemsAdded = 0;
-
-                if (entry.data.items && entry.data.items.length > 0) {
-                    entry.data.items.forEach(historyItem => {
-                        // Try to find matching item in current items
-                        let foundItem = items.find(item => 
-                            item.name === historyItem.name ||
-                            item.displayName === historyItem.name ||
-                            item.fullName === historyItem.name
-                        );
-
-                        if (foundItem) {
-                            foundItem.quantity = historyItem.quantity;
-                            importedCount++;
-                        } else if (isAdmin) {
-                            // Add new item if admin is logged in
-                            items.push({
-                                name: historyItem.name,
-                                displayName: historyItem.name,
-                                quantity: historyItem.quantity
-                            });
-                            newItemsAdded++;
-                        }
-                    });
-                }
-
-                renderItems();
-                updateFloatingButtons();
-
-                // Close the modal
-                const modal = document.querySelector('.password-modal.active');
-                if (modal) modal.remove();
-
-                // Close history modal if open
-                closeHistoryModal();
-
-                let successMessage = `Successfully imported data from history entry. `;
-                successMessage += `Set ${importedCount} item quantities`;
-                if (newItemsAdded > 0) {
-                    successMessage += `, added ${newItemsAdded} new items`;
-                }
-                if (!isAdmin && entry.data.items && entry.data.items.length > importedCount) {
-                    successMessage += `. Note: Some items couldn't be imported (admin access required to add new items)`;
-                }
-                successMessage += '.';
-
-                showMessage(successMessage, 'success');
-
-                // Save this import action to history
-                saveToHistory('Import from History', {
-                    title: entry.data.title || 'Unknown',
-                    personName: entry.data.personName || 'Unknown',
-                    pantryNumber: entry.data.pantryNumber || '',
-                    sourceEntryId: entryId,
-                    sourceDate: entry.humanDate,
-                    items: entry.data.items || []
-                });
-
-            } catch (error) {
-                console.error('Error importing from history:', error);
-                showMessage('Error importing from history entry', 'error');
-            }
-        }
-
         function showHistoryForAll() {
             let historyModal = document.getElementById('historyModal');
-            
+
             if (!historyModal) {
                 historyModal = document.createElement('div');
                 historyModal.id = 'historyModal';
@@ -1776,7 +1826,7 @@
 
         function renderPublicHistoryList(history) {
             const historyList = document.getElementById('publicHistoryList');
-            
+
             if (history.length === 0) {
                 historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No history entries found with current filters</p>';
                 return;
@@ -1790,12 +1840,10 @@
                             ${entry.data.totalItems > 0 ? `<span style="background: #4CAF50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">${entry.data.totalItems} items</span>` : ''}
                         </div>
                         <div style="display: flex; gap: 5px;">
-                            <button onclick="importFromHistoryEntry('${entry.id}')" 
-                                    style="background: #4CAF50; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Quick Import">📥</button>
                             <button onclick="viewHistoryEntryDetails('${entry.id}')" 
-                                    style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="View Details">👁️</button>
+                                    style="background: #2196F3; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;">👁️</button>
                             <button onclick="deleteHistoryEntry('${entry.id}')" 
-                                    style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;" title="Delete">×</button>
+                                    style="background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;">×</button>
                         </div>
                     </div>
                     <div style="font-size: 10px; color: #888; margin-bottom: 5px;">
@@ -1962,9 +2010,9 @@
             const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const dateStr = new Date().toISOString().slice(0, 10);
             const filename = `${safePersonName}_${safeTitle}_${dateStr}.pdf`;
-            
+
             doc.save(filename);
-            
+
             // Save to history
             const itemsWithQuantity = items.filter(item => item.quantity > 0);
             saveToHistory('PDF Export', {
@@ -1977,7 +2025,7 @@
                     quantity: item.quantity
                 }))
             });
-            
+
             showMessage('PDF downloaded successfully!', 'success');
         }
 
@@ -2018,7 +2066,7 @@
                 const safePersonName = personName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 const dateStr = new Date().toISOString().slice(0, 10);
                 const filename = `${safePersonName}_${safeTitle}_${dateStr}.xlsx`;
-                
+
                 XLSX.writeFile(wb, filename);
 
                 // Save to history
@@ -2092,9 +2140,9 @@
             const safePersonName = personNameDisplay.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const dateStr = new Date().toISOString().slice(0, 10);
             const filename = `${safePersonName}_${safeTitle}_${dateStr}.xlsx`;
-            
+
             XLSX.writeFile(wb, filename);
-            
+
             // Save to history
             const itemsWithQuantity = items.filter(item => item.quantity > 0);
             saveToHistory('XLSX Export', {
@@ -2107,7 +2155,7 @@
                     quantity: item.quantity
                 }))
             });
-            
+
             showMessage('XLSX downloaded successfully!', 'success');
         }
 
